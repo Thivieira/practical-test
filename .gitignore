@@ -1,0 +1,7 @@
+*.md
+!README.md
+.env
+!.env.sample
+wordpress
+profile-submit-pro/vendor
+profile-submit-pro/node_modules

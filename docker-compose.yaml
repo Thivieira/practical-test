@@ -1,0 +1,50 @@
+services:
+  db:
+    container_name: wordpress_db
+    image: mysql:5.7
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  wordpress:
+    container_name: wordpress_app
+    build: .
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - wordpress_data:/var/www/html:rw,cached
+      - ./profile-submit-pro:/var/www/html/wp-content/plugins/profile-submit-pro:rw,cached
+    ports:
+      - "8000:80"
+    environment:
+      - WORDPRESS_CONFIG_EXTRA=define('FS_METHOD', 'direct');
+    user: "www-data:www-data"
+
+  phpmyadmin:
+    container_name: wordpress_pma
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "8080:80"
+
+  cli:
+    image: python:3.11
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./profile-submit-pro-cli:/app
+    command: ["python", "app/main.py"]
+
+volumes:
+  db_data:
+  wordpress_data:

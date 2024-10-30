@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "path": "profile-submit-pro",
+      "name": "Plugin"
+    },
+    {
+      "path": "profile-submit-pro-cli",
+      "name": "Python CLI"
+    },
+    {
+      "path": ".",
+      "name": "Root"
+    }
+  ]
+}
