@@ -19,7 +19,7 @@ class ProfileSubmitPro {
 	}
 
 	private function load_dependencies() {
-		require_once plugin_dir_path( __DIR__ ) . 'includes/class-profile-submit-pro-loader.php';
+		require_once plugin_dir_path( __DIR__ ) . 'includes/class-loader.php';
 		$this->loader = new Loader();
 	}
 
