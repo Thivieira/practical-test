@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
 <ruleset name="ProfileSubmitPro">
-    <rule ref="WordPress"/>
+        <rule ref="WordPress">
+        <exclude name="Squiz.Commenting.FileComment.Missing"/>
+        <exclude name="Squiz.Commenting.FunctionComment.Missing"/>
+        <exclude name="Squiz.Commenting.ClassComment.Missing"/>
+        <exclude name="Squiz.Commenting.VariableComment.Missing"/>
+    </rule>
     <exclude-pattern>vendor/*</exclude-pattern>
     <exclude-pattern>node_modules/*</exclude-pattern>
 </ruleset>

@@ -30,9 +30,9 @@ class Settings {
 
 	const DEFAULT_PREFIX = 'profile_submit_pro_';
 
-	public static function get_option( $key, $default = null ) {
+	public static function get_option( $key, $default_options = null ) {
 		$options = get_option( self::DEFAULT_PREFIX . 'settings', self::DEFAULT_OPTIONS );
-		return isset( $options[ $key ] ) ? $options[ $key ] : ( $default ?? self::DEFAULT_OPTIONS[ $key ] ?? null );
+		return isset( $options[ $key ] ) ? $options[ $key ] : ( $default_options ?? self::DEFAULT_OPTIONS[ $key ] ?? null );
 	}
 
 	public static function update_option( $key, $value ) {
