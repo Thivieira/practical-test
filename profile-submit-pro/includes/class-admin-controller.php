@@ -19,7 +19,7 @@ class AdminController {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 	}
 
-	// Example method to insert data
+	// Example method to insert data.
 	public function submit_profile( $name, $email ) {
 		$this->wpdb->insert(
 			$this->wpdb->prefix . 'profile_submissions',
@@ -31,14 +31,14 @@ class AdminController {
 		);
 
 		if ( false === $this->wpdb->insert_id ) {
-			// Handle the error
+			// Handle the error.
 			return $this->wpdb->last_error;
 		}
 
 		return $this->wpdb->insert_id;
 	}
 
-	// Example method to retrieve data
+	// Example method to retrieve data.
 	public function get_profile( $id ) {
 		$query = $this->wpdb->prepare(
 			"SELECT * FROM {$this->wpdb->prefix}profile_submissions WHERE id = %d",
@@ -58,17 +58,17 @@ class AdminController {
 			Settings::MENU['settings']['position']
 		);
 
-		// Modify the automatically created submenu
+		// Modify the automatically created submenu.
 		add_submenu_page(
 			Settings::MENU['settings']['slug'],
 			Settings::MENU['settings']['title'],
-			__( Settings::MENU['settings']['menu_title'], 'profile-submit-pro' ), // Changed submenu title
+			__( Settings::MENU['settings']['menu_title'], 'profile-submit-pro' ), // Changed submenu title.
 			Settings::MENU['settings']['capability'],
 			Settings::MENU['settings']['slug'],
 			array( $this, 'render_admin_page' )
 		);
 
-		// Add submissions subpage
+		// Add submissions subpage.
 		add_submenu_page(
 			Settings::MENU['settings']['slug'], // Parent slug
 			Settings::MENU['submissions']['title'], // Page title
