@@ -9,23 +9,22 @@
  * License: GPL2
  */
 
-if (!defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 // Define essential base constants
-define('PROFILE_SUBMIT_PRO_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('PROFILE_SUBMIT_PRO_PLUGIN_URL', plugin_dir_url(__FILE__));
+define( 'PROFILE_SUBMIT_PRO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'PROFILE_SUBMIT_PRO_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Autoloader
 require_once PROFILE_SUBMIT_PRO_PLUGIN_DIR . 'autoload.php';
 
 // Initialize plugin
-function run_profile_submit_pro()
-{
-    $plugin = new ProfileSubmitPro\ProfileSubmitPro();
-    $plugin->enqueue_styles();
-    $plugin->run();
+function run_profile_submit_pro() {
+	$plugin = new ProfileSubmitPro\ProfileSubmitPro();
+	$plugin->enqueue_styles();
+	$plugin->run();
 }
 
 run_profile_submit_pro();

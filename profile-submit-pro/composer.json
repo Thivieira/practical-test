@@ -8,6 +8,6 @@
     "wp-coding-standards/wpcs": "^3.0"
   },
   "scripts": {
-    "format": "phpcbf --standard=WordPress --ignore=vendor --ignore=node_modules ."
+    "format": "phpcbf ."
   }
 }

@@ -2,7 +2,7 @@
 
 // // If uninstall is not called from WordPress, exit
 // if (!defined('WP_UNINSTALL_PLUGIN')) {
-//     exit;
+// exit;
 // }
 
 // // Delete plugin options
@@ -14,13 +14,13 @@
 
 // // Clean up any other plugin data (if you stored any custom post types)
 // $posts = get_posts(array(
-//     'post_type' => 'profile_submission',
-//     'numberposts' => -1,
-//     'post_status' => 'any',
+// 'post_type' => 'profile_submission',
+// 'numberposts' => -1,
+// 'post_status' => 'any',
 // ));
 
 // foreach ($posts as $post) {
-//     wp_delete_post($post->ID, true);
+// wp_delete_post($post->ID, true);
 // }
 
 // // Clear any scheduled cron jobs if you created any

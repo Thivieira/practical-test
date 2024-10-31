@@ -2,42 +2,42 @@
 
 namespace ProfileSubmitPro;
 
-class ProfileSubmitProSettings
-{
-    const MENU = [
-        'settings' => [
-            'title' => 'Profile Submit Pro',
-            'menu_title' => 'Settings',
-            'capability' => 'manage_options',
-            'slug' => 'profile-submit-pro',
-            'icon' => 'dashicons-id',
-            'position' => 30,
-         ],
-        'submissions' => [
-            'title' => 'Submissions',
-            'menu_title' => 'Submissions',
-            'capability' => 'manage_options',
-            'slug' => 'profile-submit-pro-submissions',
-            'position' => 31,
-         ],
-     ];
+class Settings {
 
-    const DEFAULT_OPTIONS = [
-        'daily_submission_limit' => 50,
-        'email_template' => 'default',
-        'notification_email' => '',
-     ];
+	const MENU = array(
+		'settings'    => array(
+			'title'      => 'Profile Submit Pro',
+			'menu_title' => 'Settings',
+			'capability' => 'manage_options',
+			'slug'       => 'profile-submit-pro',
+			'icon'       => 'dashicons-id',
+			'position'   => 30,
+		),
+		'submissions' => array(
+			'title'      => 'Submissions',
+			'menu_title' => 'Submissions',
+			'capability' => 'manage_options',
+			'slug'       => 'profile-submit-pro-submissions',
+			'position'   => 31,
+		),
+	);
 
-    public static function get_option($key, $default = null)
-    {
-        $options = get_option('profile_submit_pro_settings', self::DEFAULT_OPTIONS);
-        return isset($options[ $key ]) ? $options[ $key ] : ($default ?? self::DEFAULT_OPTIONS[ $key ] ?? null);
-    }
+	const DEFAULT_OPTIONS = array(
+		'daily_submission_limit' => 50,
+		'email_template'         => 'default',
+		'notification_email'     => '',
+	);
 
-    public static function update_option($key, $value)
-    {
-        $options = get_option('profile_submit_pro_settings', self::DEFAULT_OPTIONS);
-        $options[ $key ] = $value;
-        update_option('profile_submit_pro_settings', $options);
-    }
+	const DEFAULT_PREFIX = 'profile_submit_pro_';
+
+	public static function get_option( $key, $default = null ) {
+		$options = get_option( self::DEFAULT_PREFIX . 'settings', self::DEFAULT_OPTIONS );
+		return isset( $options[ $key ] ) ? $options[ $key ] : ( $default ?? self::DEFAULT_OPTIONS[ $key ] ?? null );
+	}
+
+	public static function update_option( $key, $value ) {
+		$options         = get_option( self::DEFAULT_PREFIX . 'settings', self::DEFAULT_OPTIONS );
+		$options[ $key ] = $value;
+		update_option( self::DEFAULT_PREFIX . 'settings', $options );
+	}
 }
