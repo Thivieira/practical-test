@@ -12,7 +12,7 @@
         x-model="formData.name"
         @input="validateName"
         autocomplete="name"
-        required
+
         :placeholder="translations.placeholders.name"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       <span
@@ -28,7 +28,7 @@
         type="email"
         x-model="formData.email"
         @input="validateEmail"
-        required
+
         :placeholder="translations.placeholders.email"
         autocomplete="email"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
@@ -45,7 +45,7 @@
         type="text"
         x-model="formData.  username"
         @input="validateUsername"
-        required
+
         :placeholder="translations.placeholders.username"
         autocomplete="username"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
@@ -58,7 +58,7 @@
     <div>
       <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
       <div x-data="{ show: false }" class="relative flex items-center mt-2">
-        <input required :type=" show ? 'text': 'password' " name="password" :placeholder="translations.placeholders.password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10" value="password" autocomplete="new-password" type="password" x-model="formData.password" @input="validatePassword">
+        <input :type=" show ? 'text': 'password' " name="password" :placeholder="translations.placeholders.password" id="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pr-10" value="password" autocomplete="new-password" type="password" x-model="formData.password" @input="validatePassword">
         <button type="button" class="absolute right-2 bg-transparent flex items-center justify-center hover:text-blue-600" @click="show = !show">
           <svg x-show="!show" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
@@ -83,7 +83,7 @@
         x-model="formData.phone"
         @input="validatePhone"
         autocomplete="tel"
-        required
+
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       <span
         x-show="errors.phone"
@@ -98,7 +98,7 @@
         type="text"
         x-model="formData.birthDate"
         autocomplete="bday"
-        required
+
         :placeholder="translations.placeholders.birthDate + ' - ' + translations.placeholders.dateFormat"
         @input="formatAndValidateBirthdate"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
@@ -121,7 +121,7 @@
             @input="validateAddress"
             autocomplete="street-address"
             :placeholder="translations.placeholders.street"
-            required
+
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
           <span
             x-show="errors.address?.street"
@@ -147,7 +147,7 @@
           <input
             id="city"
             type="text"
-            required
+
             x-model="formData.address.city"
             @input="validateAddress"
             autocomplete="address-level2"
@@ -164,7 +164,7 @@
           <input
             id="state"
             type="text"
-            required
+
             x-model="formData.address.state"
             @input="validateAddress"
             autocomplete="address-level1"
@@ -181,7 +181,7 @@
           <input
             id="zipCode"
             type="text"
-            required
+
             x-model="formData.address.zipCode"
             @input="validateAddress"
             autocomplete="postal-code"
@@ -198,7 +198,7 @@
         <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
         <select
           id="country"
-          required
+
           x-model="formData.address.country"
           @change="validateAddress"
           autocomplete="country"
@@ -244,7 +244,7 @@
         @input="validateCv"
         rows="10"
         autocomplete="cv"
-        required
+
         :placeholder="translations.placeholders.cv"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
       <span
