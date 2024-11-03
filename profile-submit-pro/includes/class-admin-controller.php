@@ -6,6 +6,7 @@ use ProfileSubmitPro\Settings;
 
 class AdminController {
 
+
 	private $plugin_name;
 	private $version;
 	private $wpdb;
@@ -87,7 +88,39 @@ class AdminController {
 		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/submissions-page.php';
 	}
 
-	public function enqueue_scripts() {
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/profile-submit-pro-admin.js', array( 'jquery' ), $this->version, false );
+	public function enqueue_scripts( $hook ) {
+		// Only enqueue on plugin pages
+		if ( strpos( $hook, 'profile-submit-pro' ) === false ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			$this->plugin_name,
+			plugin_dir_url( __DIR__ ) . 'assets/css/dist/profile-submit-pro.css',
+			array(),
+			$this->version,
+			'all'
+		);
+
+		wp_enqueue_script(
+			$this->plugin_name,
+			plugin_dir_url( __FILE__ ) . 'js/profile-submit-pro-admin.js',
+			array( 'jquery' ),
+			$this->version,
+			false
+		);
+	}
+
+	/**
+	 * Delete all plugin data
+	 */
+	private function delete_all_data() {
+		// Delete all data
+	}
+
+	public function uninstall() {
+		if ( Settings::get_option( 'clean_uninstall' ) ) {
+			$this->delete_all_data();
+		}
 	}
 }

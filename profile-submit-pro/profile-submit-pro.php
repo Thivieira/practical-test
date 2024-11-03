@@ -29,7 +29,6 @@ require_once PROFILE_SUBMIT_PRO_PLUGIN_DIR . 'autoload.php';
  */
 function run_profile_submit_pro() {
 	$plugin = new ProfileSubmitPro\ProfileSubmitPro();
-	$plugin->enqueue_styles();
 	$plugin->run();
 }
 

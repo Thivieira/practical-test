@@ -7,7 +7,21 @@
         <exclude name="Squiz.Commenting.VariableComment.Missing"/>
         <exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
         <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+        <exclude name="WordPress.WP.I18n.NonSingularStringLiteralText"/>
+        <exclude name="WordPress.PHP.YodaConditions.NotYoda"/>
+        <exclude name="Generic.ControlStructures.DisallowYodaConditions"/>
     </rule>
     <exclude-pattern>vendor/*</exclude-pattern>
     <exclude-pattern>node_modules/*</exclude-pattern>
+    <exclude-pattern>tailwind.config.js</exclude-pattern>
+    <exclude-pattern>package.json</exclude-pattern>
+    <exclude-pattern>package-lock.json</exclude-pattern>
+    <exclude-pattern>phpcs.xml</exclude-pattern>
+    <exclude-pattern>wordpress/*</exclude-pattern>
+    <exclude-pattern>composer.json</exclude-pattern>
+    <exclude-pattern>composer.lock</exclude-pattern>
+    <exclude-pattern>.parcel-cache/*</exclude-pattern>
+    <exclude-pattern>*.js</exclude-pattern>
+    <exclude-pattern>*.css</exclude-pattern>
+    <exclude-pattern>*.ts</exclude-pattern>
 </ruleset>

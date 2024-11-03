@@ -5,3 +5,5 @@
 wordpress
 profile-submit-pro/vendor
 profile-submit-pro/node_modules
+profile-submit-pro/.parcel-cache
+profile-submit-pro-cli/venv
