@@ -71,12 +71,11 @@
 			<dd>
 				<?php
 				$address_parts = array(
-					$submission->street . ' ' . $submission->street_number,
-					$submission->neighborhood,
-					$submission->city,
-					$submission->state,
-					$submission->postal_code,
-					$submission->country,
+					$submission->address->street . ' ' . $submission->address->unit,
+					$submission->address->city,
+					$submission->address->state,
+					$submission->address->postal_code,
+					$submission->address->country,
 				);
 				echo esc_html( implode( ', ', array_filter( $address_parts ) ) );
 				?>

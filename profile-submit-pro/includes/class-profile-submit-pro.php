@@ -12,6 +12,7 @@ class ProfileSubmitPro {
 		$this->plugin_name = 'profile-submit-pro';
 		$this->version     = '1.0.0';
 
+		Activator::activate();
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();

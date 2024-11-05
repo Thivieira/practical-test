@@ -1,4 +1,4 @@
-<div class="border-b border-gray-200 dark:border-gray-700">
+<div class="">
 	<ul class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400">
 		<?php foreach ( ProfileSubmitPro\Settings::TABS as $tab_key => $tab_title ) :
 			$tab_from_url = filter_input(

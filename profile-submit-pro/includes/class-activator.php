@@ -3,18 +3,16 @@ namespace ProfileSubmitPro;
 
 class Activator {
 
-
 	public static function activate() {
 		global $wpdb;
 		$table_name      = $wpdb->prefix . Settings::DEFAULT_PREFIX . 'submissions';
 		$charset_collate = $wpdb->get_charset_collate();
 
-		$sql = "CREATE TABLE $table_name (
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
             email varchar(255) NOT NULL,
             username varchar(255) NOT NULL,
-            password varchar(255) NOT NULL,
             phone varchar(255),
             birthdate datetime NOT NULL,
 
@@ -25,6 +23,11 @@ class Activator {
             state varchar(100),                 -- State or province
             postal_code varchar(20),            -- Postal or ZIP code
             country varchar(100) NOT NULL,      -- Country name
+
+            interests text,
+            cv text,
+
+            wordpress_user_id mediumint(9),
 
             submitted_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
             PRIMARY KEY  (id)
@@ -37,5 +40,6 @@ class Activator {
 		Settings::add_option( 'email_template', Settings::DEFAULT_OPTIONS['email_template'] );
 		Settings::add_option( 'notification_email', Settings::DEFAULT_OPTIONS['notification_email'] );
 		Settings::add_option( 'daily_submission_limit', Settings::DEFAULT_OPTIONS['daily_submission_limit'] );
+		Settings::add_option( 'notification_email_to', Settings::DEFAULT_OPTIONS['notification_email_to'] );
 	}
 }

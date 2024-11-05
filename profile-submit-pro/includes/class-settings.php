@@ -34,16 +34,18 @@ class Settings {
 	);
 
 	const DEFAULT_OPTIONS = array(
-		'daily_submission_limit' => 50,
-		'email_template'         => 'default',
-		'notification_email'     => true,
-		'clean_uninstall'        => false,
+		'daily_submission_limit'     => 50,
+		'email_template'             => 'default',
+		'notification_email'         => 1,
+		'notification_email_from'    => '',
+		'notification_email_subject' => 'Form submission',
+		'clean_uninstall'            => 0,
 	);
 
 	const DEFAULT_PREFIX = 'profile_submit_pro_';
 
 	public static function get_option( $key, $default_options = null ) {
-		$options = get_option( self::DEFAULT_PREFIX . 'settings', self::DEFAULT_OPTIONS );
+		$options = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );
 		return isset( $options[ $key ] ) ? $options[ $key ] : ( $default_options ?? self::DEFAULT_OPTIONS[ $key ] ?? null );
 	}
 
@@ -52,8 +54,17 @@ class Settings {
 	}
 
 	public static function update_option( $key, $value ) {
-		$options         = get_option( self::DEFAULT_PREFIX . 'settings', self::DEFAULT_OPTIONS );
+		$options         = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );
 		$options[ $key ] = $value;
-		update_option( self::DEFAULT_PREFIX . 'settings', $options );
+		update_option( self::DEFAULT_PREFIX . $key, $options );
+	}
+
+	public static function apply_settings_callback( $callback ) {
+		$schema = self::DEFAULT_OPTIONS;
+		foreach ( $schema as $key => $value ) {
+			if ( ! isset( $post_data[ $key ] ) ) {
+				$callback( $key, $value );
+			}
+		}
 	}
 }

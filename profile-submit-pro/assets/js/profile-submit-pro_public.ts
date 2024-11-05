@@ -18,27 +18,28 @@ const isErrorObjectEmpty = (error: any): boolean => {
 function formHandler() {
 	return {
 		formData: {
-			name: '',
-			email: '',
-			username: '',
-			password: '',
-			phone: '',
-			birthDate: '',
+			name: 'Thiago',
+			email: 'thiago.a.vieira@hotmail.com',
+			username: 'Thivieira',
+			password: 's1n2d3r4',
+			phone: '48991541005',
+			birthDate: '06/06/1997',
 			address: {
-				street: '',
-				unit: '',
-				city: '',
-				state: '',
-				zipCode: '',
-				country: ''
+				street: 'St Chroma',
+				unit: '12',
+				city: 'Blumenau',
+				state: 'SC',
+				zipCode: '89010000',
+				country: 'BR'
 			},
-			interests: [],
-			cv: '',
+			interests: ['Music', 'Sports', 'Science'],
+			cv: 'ewter53w45t4345345534354',
 		},
 		errors: {},
 		countries: window.countries || [],
 		translations: window.formTranslations,
 		dateFormat: window.formTranslations.placeholders.dateFormat,
+		config: window.formConfig,
 		loading: false,
 
 		init() {
@@ -62,7 +63,11 @@ function formHandler() {
 					loadUtilsOnInit: () => import("intl-tel-input/build/js/utils.js"),
 				});
 			}
-			fetch('/wp-content/plugins/profile-submit-pro/assets/countries.json')
+			fetch('/wp-content/plugins/profile-submit-pro/assets/countries.json', {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
 				.then(res => res.json())
 				.then(data => {
 					this.countries = data;
@@ -158,25 +163,47 @@ function formHandler() {
 				return false;
 			}
 
-			var data = {
-				action: 'submit_profile_action_handler', // Action name to handle request in PHP
-				security: this.translations.security, // Send the nonce for verification
-				post_data: this.formData
-			};
 
 			this.loading = true;
-			const response = await fetch(this.translations.ajax_url, {
-				method: 'POST',
-				body: JSON.stringify(data),
-			});
 
+			try {
+				const data = {
+					action: this.config.action,
+					security: this.config.security,
+					post_data: JSON.stringify(this.formData)
+				};
+				const response = await fetch(this.config.ajax_url, {
+					method: 'POST',
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					body: new URLSearchParams(data),
+				});
+
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+
+				const responseData = await response.json();
+				console.log(responseData);
+
+				Swal.fire({
+					icon: 'success',
+					title: 'Success!',
+					text: this.translations.errors.formSuccess,
+				});
+			} catch (error) {
+				console.error('There was a problem with your fetch operation:', error);
+				Swal.fire({
+					icon: 'error',
+					title: 'Oops...',
+					text: 'There was a problem in the server. Please try again later.',
+				});
+				return false;
+			}
 
 			this.loading = false;
-			Swal.fire({
-				icon: 'success',
-				title: 'Success!',
-				text: this.translations.errors.formSuccess,
-			});
+
 
 			return true;
 
