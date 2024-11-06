@@ -30,13 +30,15 @@
 				</thead>
 				<tbody>
 					<?php foreach ( $submissions as $submission ) : ?>
-					<?php
-					$profile_link = add_query_arg(
-						array(
-							'key' => $submission->public_key,
-						)
-					);
-					?>
+						<?php
+						$stored_url   = get_option( 'profile_submit_pro_shortcode_url' );
+						$profile_link = $stored_url . '?key=' . $submission->public_key;
+						// $profile_link = add_query_arg(
+						// array(
+						// 'key' => $submission->public_key,
+						// )
+						// );
+						?>
 					<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
 						<td class="w-4 p-4">
 							<?php echo esc_html( $submission->id ); ?>

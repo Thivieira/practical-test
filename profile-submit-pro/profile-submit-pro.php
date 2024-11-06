@@ -33,3 +33,6 @@ function run_profile_submit_pro() {
 }
 
 run_profile_submit_pro();
+
+
+register_activation_hook( __FILE__, array( 'ProfileSubmitPro\Activator', 'activate' ) );

@@ -19,15 +19,36 @@ class PublicController {
 		add_action( 'wp_ajax_submit_profile_action', array( $this, 'submit_profile_action' ) );
 		add_action( 'wp_ajax_nopriv_submit_profile_action', array( $this, 'submit_profile_action' ) );
 		add_shortcode( 'profile_submit_pro', array( $this, 'profile_submit_pro_shortcode' ) );
+		add_action( 'wp_footer', array( $this, 'check_profile_shortcode_removal' ) );  // Hook to check shortcode removal
 	}
 
 	public function profile_submit_pro_shortcode( $atts ) {
+		global $post; // Access the current post
+
 		$atts = shortcode_atts(
 			array(
 				'page' => 'default',
 			),
 			$atts
 		);
+
+		// Get the current post URL
+		$post_url = get_permalink( $post->ID );
+
+		// Retrieve the stored URL and post ID from options
+		$stored_post_id = get_option( 'profile_submit_pro_shortcode_post_id' );
+		$stored_url     = get_option( 'profile_submit_pro_shortcode_url' );
+
+		// Check if the shortcode is already used on another page
+		if ( $stored_post_id && $stored_post_id != $post->ID ) {
+			return 'This shortcode is already used on another page. Please remove it from there first.';
+		}
+
+		// Save the URL and post ID if it's the first time the shortcode is used
+		if ( ! $stored_post_id ) {
+			update_option( 'profile_submit_pro_shortcode_post_id', $post->ID );
+			update_option( 'profile_submit_pro_shortcode_url', $post_url );
+		}
 
 		switch ( $atts['page'] ) {
 			case 'profile':
@@ -71,7 +92,6 @@ class PublicController {
 		$today_submissions = $this->get_today_submissions_count();
 		return $today_submissions >= $daily_limit;
 	}
-
 
 	private function get_today_submissions_count() {
 		return $this->wpdb->get_var( "SELECT COUNT(*) FROM {$this->wpdb->prefix}profile_submissions WHERE DATE(submitted_at) = CURDATE()" );
@@ -154,6 +174,22 @@ class PublicController {
 			);
 
 			$this->enqueue_alpine_form();
+		}
+	}
+
+	// Function to check if the shortcode has been removed
+	public function check_profile_shortcode_removal() {
+		global $post;
+
+		$stored_post_id = get_option( 'profile_submit_pro_shortcode_post_id' );
+
+		// Check if the shortcode has been removed from the current post
+		if ( $stored_post_id == $post->ID ) {
+			if ( ! has_shortcode( $post->post_content, 'profile_submit_pro' ) ) {
+				// Remove the stored post ID and URL if the shortcode is gone
+				delete_option( 'profile_submit_pro_shortcode_post_id' );
+				delete_option( 'profile_submit_pro_shortcode_url' );
+			}
 		}
 	}
 }

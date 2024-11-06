@@ -108,9 +108,8 @@ class Submission {
 
 		$public_key = $this->generate_public_key();
 
-
-		$table_name = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
-		$prepared_data  = $wpdb->prepare(
+		$table_name    = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+		$prepared_data = $wpdb->prepare(
 			"INSERT INTO {$table_name} (name, email, username, phone, birthdate, street, street_number, city, state, postal_code, country, interests, cv) 
          VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 			$name,
@@ -155,6 +154,36 @@ class Submission {
 		$count = $wpdb->get_var( $query );
 
 		return $count == 0; // Return true if unique (count is 0)
+	}
+
+	public static function is_public_key_valid( $public_key ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+
+		$query = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table_name} WHERE public_key = %s",
+			$public_key
+		);
+
+		$count = $wpdb->get_var( $query );
+
+		return $count > 0;
+	}
+
+	public static function the_user_can_edit( $public_key ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+
+		$query = $wpdb->prepare(
+			"SELECT wordpress_user_id FROM {$table_name} WHERE public_key = %s",
+			$public_key
+		);
+
+		$user_id = $wpdb->get_var( $query );
+
+		$current_user = wp_get_current_user();
+
+		return $user_id == $current_user->ID || $current_user->has_cap( 'administrator' );
 	}
 
 	private function insert_submission( $prepared_data ) {
