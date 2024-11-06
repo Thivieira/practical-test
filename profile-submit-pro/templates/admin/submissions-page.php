@@ -33,11 +33,6 @@
 						<?php
 						$stored_url   = get_option( 'profile_submit_pro_shortcode_url' );
 						$profile_link = $stored_url . '?key=' . $submission->public_key;
-						// $profile_link = add_query_arg(
-						// array(
-						// 'key' => $submission->public_key,
-						// )
-						// );
 						?>
 					<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
 						<td class="w-4 p-4">
@@ -73,10 +68,11 @@
 			$total_pages  = $pagination['total_pages'];
 			$from         = $current_page * $limit - $limit + 1;
 			$to           = $current_page * $limit;
+			$total_items  = $limit * $total_pages;
 			?>
 			<?php if ( $total_pages > 1 ) : ?>
 			<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4" aria-label="Table navigation">
-				<span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white"><?php echo esc_html( $from ); ?>-<?php echo esc_html( $to ); ?></span> of <span class="font-semibold text-gray-900 dark:text-white"><?php echo esc_html( $total_pages ); ?></span></span>
+				<span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white"><?php echo esc_html( $from ); ?>-<?php echo esc_html( $to ); ?></span> of <span class="font-semibold text-gray-900 dark:text-white"><?php echo esc_html( $total_items ); ?></span></span>
 				<ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
 					<?php
 					for ( $i = 1; $i <= $total_pages; $i++ ) {

@@ -9,6 +9,8 @@ class PublicController {
 	private $loader;
 
 	public function __construct( $plugin_name, $version ) {
+		global $wpdb;
+		$this->wpdb        = $wpdb;
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 		$this->loader      = new Loader();
@@ -39,13 +41,13 @@ class PublicController {
 		$stored_post_id = get_option( 'profile_submit_pro_shortcode_post_id' );
 		$stored_url     = get_option( 'profile_submit_pro_shortcode_url' );
 
-		// Check if the shortcode is already used on another page
-		if ( $stored_post_id && $stored_post_id != $post->ID ) {
+		// Check if the shortcode is already used on another page with 'page' attribute set to 'profile'
+		if ( $atts['page'] === 'profile' && $stored_post_id && $stored_post_id != $post->ID ) {
 			return 'This shortcode is already used on another page. Please remove it from there first.';
 		}
 
-		// Save the URL and post ID if it's the first time the shortcode is used
-		if ( ! $stored_post_id ) {
+		// Save the URL and post ID if it's the first time the shortcode with 'page="profile"' is used
+		if ( $atts['page'] === 'profile' && ! $stored_post_id ) {
 			update_option( 'profile_submit_pro_shortcode_post_id', $post->ID );
 			update_option( 'profile_submit_pro_shortcode_url', $post_url );
 		}
@@ -60,6 +62,7 @@ class PublicController {
 				break;
 		}
 	}
+
 
 	public function submit_profile_action() {
 		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'my_action' ) ) {
@@ -94,7 +97,8 @@ class PublicController {
 	}
 
 	private function get_today_submissions_count() {
-		return $this->wpdb->get_var( "SELECT COUNT(*) FROM {$this->wpdb->prefix}profile_submissions WHERE DATE(submitted_at) = CURDATE()" );
+		$table_name = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+		return $this->wpdb->get_var( $this->wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE DATE(submitted_at) = CURDATE()", $table_name ) );
 	}
 
 	public function enqueue_alpine_form() {
