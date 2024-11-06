@@ -53,11 +53,28 @@ class PublicController {
 			wp_die();
 		}
 
+		// daily submission limit reached
+		if ( $this->daily_submission_limit_reached() ) {
+			wp_send_json_error( array( 'message' => 'Daily submission limit reached' ) );
+			wp_die();
+		}
+
 		$submission = new Submission( $post_data );
 		$submission->save();
 
 		wp_send_json_success( array( 'message' => 'Profile submitted successfully.' ) );
 		wp_die();
+	}
+
+	private function daily_submission_limit_reached() {
+		$daily_limit       = Settings::get_option( 'daily_submission_limit' );
+		$today_submissions = $this->get_today_submissions_count();
+		return $today_submissions >= $daily_limit;
+	}
+
+
+	private function get_today_submissions_count() {
+		return $this->wpdb->get_var( "SELECT COUNT(*) FROM {$this->wpdb->prefix}profile_submissions WHERE DATE(submitted_at) = CURDATE()" );
 	}
 
 	public function enqueue_alpine_form() {

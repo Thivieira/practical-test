@@ -8,6 +8,55 @@ class Submission {
 		$post_data        = stripslashes( $post_data );
 		$this->post_data  = json_decode( $post_data, true );
 		$this->table_name = $wpdb->prefix . Settings::DEFAULT_PREFIX . 'submissions';
+		$this->define_hooks();
+	}
+
+	private function define_hooks() {
+		add_action(
+			'rest_api_init',
+			function () {
+				register_rest_route(
+					'profile-submit-pro/v1',
+					'/submit',
+					array(
+						'methods'             => 'POST',
+						'callback'            => array( $this, 'handle_api_submission' ),
+						'permission_callback' => '__return_true', // Adjust permissions as needed
+					)
+				);
+			}
+		);
+	}
+
+	public function handle_api_submission( WP_REST_Request $request ) {
+		$post_data = $request->get_json_params();
+
+		if ( ! $this->validate_request_data( $post_data ) ) {
+			return new WP_REST_Response( 'Invalid data', 400 );
+		}
+
+		$this->post_data = $post_data; // Set the post data for the submission
+
+		if ( $this->save() ) {
+			return new WP_REST_Response( 'Submission successful', 200 );
+		} else {
+			return new WP_REST_Response( 'Submission failed', 400 );
+		}
+	}
+
+	private function validate_request_data( $post_data ) {
+		if ( empty( $post_data['name'] ) ||
+		empty( $post_data['email'] ) ||
+		empty( $post_data['username'] ) ||
+		empty( $post_data['password'] ) ) {
+			return false;
+		}
+
+		if ( ! filter_var( $post_data['email'], FILTER_VALIDATE_EMAIL ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	public function save() {
@@ -57,9 +106,12 @@ class Submission {
 		$interests = json_encode( $this->post_data['interests'] );
 		$cv        = $this->post_data['cv'];
 
-		$default_prefix = $wpdb->prefix . Settings::DEFAULT_PREFIX;
+		$public_key = $this->generate_public_key();
+
+
+		$table_name = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
 		$prepared_data  = $wpdb->prepare(
-			"INSERT INTO {$default_prefix}submissions (name, email, username, phone, birthdate, street, street_number, city, state, postal_code, country, interests, cv) 
+			"INSERT INTO {$table_name} (name, email, username, phone, birthdate, street, street_number, city, state, postal_code, country, interests, cv) 
          VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 			$name,
 			$email,
@@ -73,12 +125,36 @@ class Submission {
 			$zip_code,
 			$country,
 			$interests,
-			$cv
+			$cv,
+			$public_key
 		);
 
 		error_log( 'Prepared data: ' . $prepared_data );
 
 		return $prepared_data;
+	}
+
+	private function generate_public_key() {
+		do {
+			$public_key = wp_generate_password( 20, false ); // Generate a random string
+			$public_key = preg_replace( '/[^A-Za-z0-9-]/', '', $public_key ); // Make it URL-friendly
+			$is_unique  = $this->is_public_key_unique( $public_key ); // Check uniqueness
+		} while ( ! $is_unique ); // Repeat until a unique key is found
+
+		return $public_key;
+	}
+
+	private function is_public_key_unique( $public_key ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+
+		$query = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$table_name} WHERE public_key = %s",
+			$public_key
+		);
+		$count = $wpdb->get_var( $query );
+
+		return $count == 0; // Return true if unique (count is 0)
 	}
 
 	private function insert_submission( $prepared_data ) {

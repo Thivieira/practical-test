@@ -6,7 +6,7 @@
 				'tab'
 			);
 
-			$is_active      = $tab_from_url ? $tab_from_url === $tab_key : $tab_key === 'general'; // Default to 'general' if no tab
+			$is_active      = $tab_from_url ? $tab_from_url === $tab_key : $tab_key === 'submissions'; // Default to 'submissions' if no tab
 			$active_classes = $is_active ? 'text-blue-600 bg-gray-100 border-blue-600 dark:text-blue-500 dark:bg-gray-800' : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300';
 			?>
 			<li class="me-2">

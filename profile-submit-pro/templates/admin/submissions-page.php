@@ -1,13 +1,7 @@
 <div class="container mx-auto p-4">
 	<div class="">
 		<h1 class="text-2xl font-bold mb-4">Submissions</h1>
-		<p class="text-lg mb-4">Submissions page</p>
 	</div>
-	<!-- if there are no submissions, show a message -->
-	<div class="bg-gray-100 p-4 rounded-md">
-		<p class="text-lg mb-4"><?php esc_html_e( 'No submissions found', 'profile-submit-pro' ); ?></p>
-	</div>
-
 <!-- if there are submissions, show a table -->
 	<div class="">
 		<div class="relative overflow-x-autosm:rounded-lg">
@@ -36,59 +30,81 @@
 				</thead>
 				<tbody>
 					<?php foreach ( $submissions as $submission ) : ?>
+					<?php
+					$profile_link = add_query_arg(
+						array(
+							'key' => $submission->public_key,
+						)
+					);
+					?>
 					<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
 						<td class="w-4 p-4">
-							<div class="flex items-center">
-								<input id="checkbox-table-search-1" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
-								<label for="checkbox-table-search-1" class="sr-only">checkbox</label>
-							</div>
+							<?php echo esc_html( $submission->id ); ?>
 						</td>
 						<th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-							Apple MacBook Pro 17"
+							<?php echo esc_html( $submission->email ); ?>
 						</th>
 						<td class="px-6 py-4">
-							Silver
+							<?php echo esc_html( $submission->username ); ?>
 						</td>
 						<td class="px-6 py-4">
-							Laptop
+							<?php echo esc_html( $submission->phone ); ?>
 						</td>
 						<td class="px-6 py-4">
-							$2999
+							<?php echo esc_html( gmdate( 'm/d/Y', strtotime( $submission->submitted_at ) ) ); ?>
 						</td>
 						<td class="px-6 py-4">
-							<a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+							<a href="<?php echo esc_url( $profile_link ); ?>" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Profile link</a>
 						</td>
 					</tr>
 					<?php endforeach; ?>
 
+					<?php if ( empty( $submissions ) ) : ?>
+					<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+						<td colspan="6" scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"><?php esc_html_e( 'No submissions found', 'profile-submit-pro' ); ?></td>
+					</tr>
+					<?php endif; ?>
 				</tbody>
 			</table>
+			<?php
+			$current_page = $pagination['current_page'];
+			$total_pages  = $pagination['total_pages'];
+			$from         = $current_page * $limit - $limit + 1;
+			$to           = $current_page * $limit;
+			?>
+			<?php if ( $total_pages > 1 ) : ?>
 			<nav class="flex items-center flex-column flex-wrap md:flex-row justify-between pt-4" aria-label="Table navigation">
-				<span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white">1-10</span> of <span class="font-semibold text-gray-900 dark:text-white"><?php echo count( $submissions ); ?></span></span>
+				<span class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">Showing <span class="font-semibold text-gray-900 dark:text-white"><?php echo esc_html( $from ); ?>-<?php echo esc_html( $to ); ?></span> of <span class="font-semibold text-gray-900 dark:text-white"><?php echo esc_html( $total_pages ); ?></span></span>
 				<ul class="inline-flex -space-x-px rtl:space-x-reverse text-sm h-8">
-					<li>
-						<a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-					</li>
-					<li>
-						<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
-					</li>
-					<li>
-						<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">2</a>
-					</li>
-					<li>
-						<a href="#" aria-current="page" class="flex items-center justify-center px-3 h-8 text-blue-600 border border-gray-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">3</a>
-					</li>
-					<li>
-						<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">4</a>
-					</li>
-					<li>
-						<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
-					</li>
-					<li>
-				<a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-					</li>
+					<?php
+					for ( $i = 1; $i <= $total_pages; $i++ ) {
+						$url             = add_query_arg(
+							array(
+								'offset' => ( $i - 1 ) * $limit,
+								'limit'  => $limit,
+							)
+						);
+						$is_current_page = $i === $current_page;
+						$class_name      = 'flex items-center justify-center px-3 h-8 leading-tight bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white';
+						if ( $is_current_page ) {
+							$class_name .= ' text-blue-600 dark:text-white';
+						} else {
+							$class_name .= ' text-gray-500';
+						}
+						$aria_current = '';
+						if ( $is_current_page ) {
+							$aria_current = 'page';
+						}
+						?>
+						<li>
+							<a href="<?php echo esc_url( $url ); ?>" aria-current="<?php echo esc_attr( $aria_current ); ?>" class="<?php echo esc_attr( $class_name ); ?>"><?php echo esc_html( $i ); ?></a>
+						</li>
+						<?php
+					}
+					?>
 				</ul>
 			</nav>
+			<?php endif; ?>
 			</div>
 		</div>
 	</div>

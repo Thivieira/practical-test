@@ -5,31 +5,41 @@ namespace ProfileSubmitPro;
 class Settings {
 
 	const MENU = array(
-		'settings'    => array(
+		'settings' => array(
 			'title'      => 'Profile Submit Pro',
 			'menu_title' => 'Settings',
 			'capability' => 'manage_options',
 			'slug'       => 'profile-submit-pro',
 			'icon'       => 'dashicons-id',
 			'position'   => 30,
+			'submenu'    => array(
+				'settings'    => array(
+					'title'      => 'Settings',
+					'menu_title' => 'Settings',
+					'capability' => 'manage_options',
+					'slug'       => 'profile-submit-pro',
+					'position'   => 30,
+				),
+				'submissions' => array(
+					'title'      => 'Submissions',
+					'menu_title' => 'Submissions',
+					'capability' => 'manage_options',
+					'slug'       => 'profile-submit-pro-submissions',
+					'position'   => 31,
+				),
+			),
 		),
-		'submissions' => array(
-			'title'      => 'Submissions',
-			'menu_title' => 'Submissions',
-			'capability' => 'manage_options',
-			'slug'       => 'profile-submit-pro-submissions',
-			'position'   => 31,
-		),
+
 	);
 
 	const TABS = array(
+		'submissions' => array(
+			'name' => 'Submissions',
+			'icon' => 'dashicons-email',
+		),
 		'general'     => array(
 			'name' => 'General Settings',
 			'icon' => 'dashicons-admin-settings',
-		),
-		'submissions' => array(
-			'name' => 'Submissions',
-			'icon' => 'dashicons-admin-post',
 		),
 	);
 
@@ -43,6 +53,8 @@ class Settings {
 	);
 
 	const DEFAULT_PREFIX = 'profile_submit_pro_';
+
+	const SUBMISSIONS_TABLE = self::DEFAULT_PREFIX . 'submissions';
 
 	public static function get_option( $key, $default_options = null ) {
 		$options = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );

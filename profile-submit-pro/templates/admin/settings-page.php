@@ -6,9 +6,9 @@
 	<?php ProfileSubmitPro\TemplateLoader::load_admin_partial( 'tabs' ); ?>
 	<?php
 	$tab_page = filter_input( INPUT_GET, 'tab' );
-	if ( 'general' === $tab_page || empty( $tab_page ) ) :
+	if ( 'general' === $tab_page ) :
 		ProfileSubmitPro\TemplateLoader::load_admin_partial( 'tabs/general' );
-	elseif ( 'submissions' === $tab_page ) :
+	elseif ( 'submissions' === $tab_page || empty( $tab_page ) ) :
 		ProfileSubmitPro\TemplateLoader::load_admin_partial( 'tabs/submissions' );
 	endif;
 	?>

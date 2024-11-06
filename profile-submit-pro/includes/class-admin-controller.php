@@ -39,20 +39,20 @@ class AdminController {
 		// Modify the automatically created submenu.
 		add_submenu_page(
 			Settings::MENU['settings']['slug'],
-			Settings::MENU['settings']['title'],
-			__( Settings::MENU['settings']['menu_title'], 'profile-submit-pro' ), // Changed submenu title.
-			Settings::MENU['settings']['capability'],
-			Settings::MENU['settings']['slug'],
+			Settings::MENU['settings']['submenu']['settings']['title'],
+			__( Settings::MENU['settings']['submenu']['settings']['menu_title'], 'profile-submit-pro' ), // Changed submenu title.
+			Settings::MENU['settings']['submenu']['settings']['capability'],
+			Settings::MENU['settings']['submenu']['settings']['slug'],
 			array( $this, 'render_admin_page' )
 		);
 
 		// Add submissions subpage.
 		add_submenu_page(
 			Settings::MENU['settings']['slug'], // Parent slug
-			Settings::MENU['submissions']['title'], // Page title
-			Settings::MENU['submissions']['menu_title'], // Menu title
-			Settings::MENU['submissions']['capability'], // Capability
-			Settings::MENU['submissions']['slug'], // Menu slug
+			Settings::MENU['settings']['submenu']['submissions']['title'], // Page title
+			Settings::MENU['settings']['submenu']['submissions']['menu_title'], // Menu title
+			Settings::MENU['settings']['submenu']['submissions']['capability'], // Capability
+			Settings::MENU['settings']['submenu']['submissions']['slug'], // Menu slug
 			array( $this, 'render_submissions_page' ) // Callback function
 		);
 	}
@@ -62,13 +62,35 @@ class AdminController {
 	}
 
 	public function render_submissions_page() {
-		$submissions = $this->get_submissions();
+		$limit       = isset( $_GET['limit'] ) ? intval( $_GET['limit'] ) : 10;
+		$offset      = isset( $_GET['offset'] ) ? intval( $_GET['offset'] ) : 0;
+		$data        = $this->get_submissions( $limit, $offset );
+		$submissions = $data['submissions'];
+		$pagination  = $data['pagination'];
+
 		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/submissions-page.php';
 	}
 
-	public function get_submissions() {
-		$submissions = $this->wpdb->get_results( "SELECT * FROM {$this->wpdb->prefix}profile_submissions" );
-		return $submissions;
+	public function get_submissions( $limit = 10, $offset = 0 ) {
+		$table_name  = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+		$submissions = $this->wpdb->get_results( "SELECT * FROM {$table_name} LIMIT {$limit} OFFSET {$offset}" );
+		$pagination  = $this->get_pagination( $limit, $offset );
+		return array(
+			'submissions' => $submissions,
+			'pagination'  => $pagination,
+		);
+	}
+
+	public function get_pagination( $limit = 10, $offset = 0 ) {
+		$table_name        = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+		$total_submissions = $this->wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+		$total_pages       = ceil( $total_submissions / $limit );
+		$current_page      = ( $offset / $limit ) + 1;
+		return array(
+			'total'        => $total_submissions,
+			'total_pages'  => $total_pages,
+			'current_page' => $current_page,
+		);
 	}
 
 	public function get_plugin_settings() {
@@ -77,7 +99,7 @@ class AdminController {
 		Settings::apply_settings_callback(
 			function ( $key, $value ) use ( &$settings ) {
 				$option = Settings::get_option( $key );
-				if ( $key === 'notification_email_to' && empty( $value ) ) {
+				if ( $key === 'notification_email_from' && empty( $value ) ) {
 					$option = get_option( 'admin_email' );
 				}
 				$settings[ $key ] = $option;

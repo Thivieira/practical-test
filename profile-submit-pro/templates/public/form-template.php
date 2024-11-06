@@ -1,7 +1,7 @@
 <div
   x-data="formHandler()"
   class="container mx-auto max-w-lg p-8 bg-white rounded-lg shadow-lg">
-  <h1 class="text-2xl font-bold mb-6 text-center">Registration Form</h1>
+  <h2 class="text-2xl font-bold mb-6 text-center">Registration Form</h2>
 
   <form @submit.prevent="validateForm" class="space-y-6">
     <div>
