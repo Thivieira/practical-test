@@ -16,6 +16,7 @@ class ProfileSubmitPro {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_submission_hooks();
 	}
 
 	private function load_dependencies() {
@@ -45,6 +46,12 @@ class ProfileSubmitPro {
 	private function define_public_hooks() {
 		$plugin_public = new PublicController( $this->get_plugin_name(), $this->get_version() );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+	}
+
+	public function define_submission_hooks() {
+		$plugin_submission = new Submission( $this->get_plugin_name(), $this->get_version() );
+		$this->loader->add_action( 'wp_ajax_submit_profile_action', $plugin_submission, 'submit_profile_action' );
+		$this->loader->add_action( 'wp_ajax_nopriv_submit_profile_action', $plugin_submission, 'submit_profile_action' );
 	}
 
 	public function run() {

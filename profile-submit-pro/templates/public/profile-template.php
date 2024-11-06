@@ -7,7 +7,7 @@ if ( ! isset( $_GET['key'] ) ) {
 	return;
 }
 
-$is_key_valid = \ProfileSubmitPro\Submission::is_public_key_valid( $key );
+$is_key_valid = \ProfileSubmitPro\SubmissionManager::is_public_key_valid( $key );
 
 if ( ! $is_key_valid ) {
 	echo 'Profile not found';
@@ -15,7 +15,7 @@ if ( ! $is_key_valid ) {
 }
 
 
-$the_user_can_edit = \ProfileSubmitPro\Submission::the_user_can_edit( $key );
+$the_user_can_edit = \ProfileSubmitPro\SubmissionManager::the_user_can_edit( $key );
 
 
 if ( $the_user_can_edit ) :

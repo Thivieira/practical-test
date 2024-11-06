@@ -65,21 +65,29 @@
 			<dd><?php echo esc_html( $submission->phone ); ?></dd>
 
 			<dt><?php esc_html_e( 'Birth Date', 'profile-submit-pro' ); ?></dt>
-			<dd><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $submission->birthdate ) ) ); ?></dd>
+			<dd><?php echo esc_html( date_i18n( get_option( 'date_format' ), strtotime( $submission->birth_date ) ) ); ?></dd>
 
 			<dt><?php esc_html_e( 'Address', 'profile-submit-pro' ); ?></dt>
 			<dd>
 				<?php
 				$address_parts = array(
-					$submission->address->street . ' ' . $submission->address->unit,
-					$submission->address->city,
-					$submission->address->state,
-					$submission->address->postal_code,
-					$submission->address->country,
+					$submission->street . ' ' . $submission->unit,
+					$submission->city,
+					$submission->state,
+					$submission->zip_code,
+					$submission->country,
 				);
 				echo esc_html( implode( ', ', array_filter( $address_parts ) ) );
 				?>
 			</dd>
+
+			<dt><?php esc_html_e( 'Interests', 'profile-submit-pro' ); ?></dt>
+			<?php
+			if ( $submission->interests ) :
+				$interests = json_decode( $submission->interests );
+				?>
+				<dd><?php echo esc_html( implode( ', ', $interests ) ); ?></dd>
+			<?php endif; ?>
 
 			<dt><?php esc_html_e( 'Submission Date', 'profile-submit-pro' ); ?></dt>
 			<dd><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $submission->submitted_at ) ) ); ?></dd>

@@ -142,10 +142,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"dbbxu":[function(require,module,exports) {
+})({"8I3Ue":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
-var HMR_PORT = 1234;
+var HMR_PORT = 42853;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
@@ -661,8 +661,55 @@ function formHandler() {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             this.errors.email = !emailRegex.test(this.formData.email) ? this.translations.errors.email : "";
         },
+        async validateEmailExists () {
+            const data = {
+                action: "verify_email_exists",
+                security: this.config.security,
+                email: this.formData.email
+            };
+            try {
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                if (responseData.data.exists) {
+                    this.errors.email = this.translations.errors.emailExists;
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error verifying email exists:", error);
+                this.errors.email = "Error verifying email exists";
+                return false;
+            }
+        },
         validateUsername () {
             this.errors.username = this.formData.username.length < 3 ? this.translations.errors.username : "";
+        },
+        async validateUsernameExists () {
+            const data = {
+                action: "verify_username_exists",
+                security: this.config.security,
+                username: this.formData.username
+            };
+            try {
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                if (responseData.data.exists) {
+                    this.errors.username = this.translations.errors.usernameExists;
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error verifying username exists:", error);
+                this.errors.username = "Error verifying username exists";
+            }
         },
         validatePassword () {
             // Password must have at least 8 characters, including letters and numbers
@@ -717,6 +764,8 @@ function formHandler() {
             this.validateAddress();
             this.validateInterests();
             this.validateCv();
+            await this.validateEmailExists();
+            await this.validateUsernameExists();
             const valid = Object.values(this.errors).every((error)=>error === "" || isErrorObjectEmpty(error));
             if (!valid) {
                 (0, _sweetalert2Default.default).fire({
@@ -10500,6 +10549,6 @@ exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
 
-},{}]},["dbbxu","fyuRC"], "fyuRC", "parcelRequire4480")
+},{}]},["8I3Ue","fyuRC"], "fyuRC", "parcelRequire4480")
 
 //# sourceMappingURL=profile-submit-pro_public.js.map

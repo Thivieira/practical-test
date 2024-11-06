@@ -106,7 +106,9 @@ class PublicController {
 			'errors'       => array(
 				'name'        => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
 				'email'       => __( 'Invalid email address', 'your-text-domain' ),
+				'emailExists' => __( 'Email already exists', 'your-text-domain' ),
 				'username'    => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
+				'usernameExists' => __( 'Username already exists', 'your-text-domain' ),
 				'password'    => __( 'Password must have at least 8 characters, including letters and numbers', 'your-text-domain' ),
 				'phone'       => __( 'Invalid phone number', 'your-text-domain' ),
 				'birthDate'   => __( 'It must be a valid date', 'your-text-domain' ),
