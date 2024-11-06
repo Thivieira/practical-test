@@ -218,7 +218,7 @@ class Submission {
 		$template      = Settings::get_option( 'email_template', 'default' );
 		$template_path = plugin_dir_path( __DIR__ ) . 'templates/email/' . $template . '.php';
 		$submission    = (object) $this->post_data;
-		$profile_link  = get_permalink( $submission->wordpress_user_id );
+		$profile_link = get_option( 'profile_submit_pro_shortcode_url' ) . '?key=' . $submission->public_key;
 
 		// Start output buffering
 		ob_start();

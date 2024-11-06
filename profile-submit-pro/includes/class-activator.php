@@ -93,29 +93,40 @@ class Activator {
 	private static function create_profile_page() {
 		$page_title   = 'Profile';
 		$page_content = '[profile_submit_pro page="profile"]';
-		$page_check   = get_page_by_title( $page_title );
 
+		// Check if the shortcode exists anywhere on the site
 		$shortcode_exists = false;
 
-		if ( $page_check ) {
-			if ( has_shortcode( $page_check->post_content, 'profile_submit_pro' ) ) {
-				if ( strpos( $page_check->post_content, '[profile_submit_pro page="profile"]' ) !== false ) {
-					$shortcode_exists = true;
-				}
-			}
+		// Query for any post or page containing the shortcode
+		$query = new \WP_Query(
+			array(
+				'post_type'      => array( 'post', 'page' ),
+				'posts_per_page' => -1, // Check all posts and pages
+				'post_status'    => 'any', // Include all statuses (published, drafts, etc.)
+				's'              => $page_content, // Search for the shortcode in the content
+			)
+		);
+
+		// If any posts/pages contain the shortcode, set $shortcode_exists to true
+		if ( $query->have_posts() ) {
+			$shortcode_exists = true;
 		}
-        
-		if ( ! $page_check ) {
-			$page = array(
-				'post_title'   => $page_title,
-				'post_content' => $page_content,
-				'post_status'  => 'publish',
-				'post_type'    => 'page',
-			);
-			wp_insert_post( $page );
-		} elseif ( ! $shortcode_exists ) {
-			$page_check->post_content .= "\n" . $page_content;
-			wp_update_post( $page_check );
+
+		// If the shortcode doesn't exist anywhere, create the profile page
+		if ( ! $shortcode_exists ) {
+			// Check if the profile page already exists
+			$page_check = get_page_by_title( $page_title );
+
+			if ( ! $page_check ) {
+				// Create the page with the desired shortcode
+				$page = array(
+					'post_title'   => $page_title,
+					'post_content' => $page_content,
+					'post_status'  => 'publish',
+					'post_type'    => 'page',
+				);
+				wp_insert_post( $page );
+			}
 		}
 	}
 }
