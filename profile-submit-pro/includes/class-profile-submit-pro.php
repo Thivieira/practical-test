@@ -4,6 +4,7 @@ namespace ProfileSubmitPro;
 
 class ProfileSubmitPro {
 
+
 	protected $loader;
 	protected $plugin_name;
 	protected $version;
@@ -50,8 +51,10 @@ class ProfileSubmitPro {
 
 	public function define_submission_hooks() {
 		$plugin_submission = new Submission( $this->get_plugin_name(), $this->get_version() );
-		$this->loader->add_action( 'wp_ajax_submit_profile_action', $plugin_submission, 'submit_profile_action' );
-		$this->loader->add_action( 'wp_ajax_nopriv_submit_profile_action', $plugin_submission, 'submit_profile_action' );
+		$this->loader->add_action( 'wp_ajax_' . Settings::PROFILE_FORM_SUBMIT_ACTION, $plugin_submission, Settings::PROFILE_FORM_SUBMIT_ACTION );
+		$this->loader->add_action( 'wp_ajax_nopriv_' . Settings::PROFILE_FORM_SUBMIT_ACTION, $plugin_submission, Settings::PROFILE_FORM_SUBMIT_ACTION );
+		$this->loader->add_action( 'wp_ajax_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, $plugin_submission, Settings::PUBLIC_FORM_SUBMIT_ACTION );
+		$this->loader->add_action( 'wp_ajax_nopriv_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, $plugin_submission, Settings::PUBLIC_FORM_SUBMIT_ACTION );
 	}
 
 	public function run() {

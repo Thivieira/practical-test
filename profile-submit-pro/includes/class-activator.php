@@ -3,6 +3,7 @@ namespace ProfileSubmitPro;
 
 class Activator {
 
+
 	public static function activate() {
 		global $wpdb;
 		$table_name      = $wpdb->prefix . Settings::DEFAULT_PREFIX . 'submissions';
@@ -44,7 +45,7 @@ class Activator {
 			'email'             => 'varchar(255) NOT NULL',
 			'username'          => 'varchar(255) NOT NULL',
 			'phone'             => 'varchar(255)',
-			'birthdate'         => 'datetime NOT NULL',
+			'birthdate'         => 'date NOT NULL',
 			'street'            => 'varchar(255) NOT NULL',
 			'street_number'     => 'varchar(20)',
 			'neighborhood'      => 'varchar(100)',

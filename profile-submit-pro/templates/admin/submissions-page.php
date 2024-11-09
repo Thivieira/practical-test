@@ -1,4 +1,4 @@
-<div class="container mx-auto p-4">
+<div class="mt-[10px] mr-[20px] mb-0 ml-[2px]">
 	<div class="">
 		<h1 class="text-2xl font-bold mb-4">Submissions</h1>
 	</div>

@@ -98,7 +98,6 @@
         type="text"
         x-model="formData.birthDate"
         autocomplete="bday"
-
         :placeholder="translations.placeholders.birthDate + ' - ' + translations.placeholders.dateFormat"
         @input="formatAndValidateBirthdate"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
@@ -217,7 +216,7 @@
     <div>
       <label for="interests" class="block text-sm font-medium text-gray-700">Interests</label>
       <div class="mt-2 grid grid-cols-2 gap-4"
-        x-data="{ 
+        x-data="{
              interestOptions: ['Music', 'Movies', 'Sports', 'Books', 'Science', 'Arts']
            }">
         <template x-for="interest in interestOptions" :key="interest">

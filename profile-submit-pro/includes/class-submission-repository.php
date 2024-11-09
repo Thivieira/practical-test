@@ -3,6 +3,8 @@
 namespace ProfileSubmitPro;
 
 class SubmissionRepository {
+
+
 	private $wpdb;
 
 	public function __construct() {
@@ -31,6 +33,22 @@ class SubmissionRepository {
 		return true;
 	}
 
+	public function update( $prepared_data, $input_data ) {
+		if ( ! $prepared_data ) {
+			error_log( 'Failed to prepare data for submission.' );
+			return false;
+		}
+
+		$result = $this->update_submission( $prepared_data );
+
+		if ( ! $result ) {
+			error_log( 'Failed to update submission into the database.' );
+			return false;
+		}
+
+		return true;
+	}
+
 	private function insert_submission( $prepared_data ) {
 		$result = $this->wpdb->query( $prepared_data );
 
@@ -42,8 +60,18 @@ class SubmissionRepository {
 		return $this->wpdb->insert_id;
 	}
 
+	private function update_submission( $prepared_data ) {
+		try {
+			$this->wpdb->update( $this->table_name, $prepared_data, array( 'id' => $input_data['id'] ) );
+			return true;
+		} catch ( \Exception $e ) {
+			error_log( 'Database update error: ' . $e->getMessage() );
+			return false;
+		}
+	}
+
 	public function verify_email_exists( $email ) {
-			return $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->wpdb->users} WHERE user_email = %s", $email ) );
+		return $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->wpdb->users} WHERE user_email = %s", $email ) );
 	}
 
 	public function verify_username_exists( $username ) {
@@ -62,6 +90,14 @@ class SubmissionRepository {
 
 	public function update_submission_with_user_id( $user_id, $post_data_id ) {
 		$this->wpdb->update( $this->table_name, array( 'wordpress_user_id' => $user_id ), array( 'id' => $post_data_id ) );
+	}
+
+	public function get_submission_attribute( $attributeName, $searchField, $searchValue ) {
+		return $this->wpdb->get_var( $this->wpdb->prepare( "SELECT {$attributeName} FROM {$this->table_name} WHERE {$searchField} = %s", $searchValue ) );
+	}
+
+	public function get_profile_from_user_id( $user_id ) {
+		return $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE wordpress_user_id = %d", $user_id ) );
 	}
 
 	public function generate_public_key() {

@@ -4,6 +4,7 @@ namespace ProfileSubmitPro;
 
 class PublicController {
 
+
 	private $plugin_name;
 	private $version;
 	private $loader;
@@ -18,10 +19,12 @@ class PublicController {
 	}
 
 	private function define_hooks() {
-		add_action( 'wp_ajax_submit_profile_action', array( $this, 'submit_profile_action' ) );
-		add_action( 'wp_ajax_nopriv_submit_profile_action', array( $this, 'submit_profile_action' ) );
+		add_action( 'wp_ajax_' . Settings::PROFILE_FORM_SUBMIT_ACTION, array( $this, Settings::PROFILE_FORM_SUBMIT_ACTION ) );
+		add_action( 'wp_ajax_nopriv_' . Settings::PROFILE_FORM_SUBMIT_ACTION, array( $this, Settings::PROFILE_FORM_SUBMIT_ACTION ) );
+		add_action( 'wp_ajax_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, array( $this, Settings::PUBLIC_FORM_SUBMIT_ACTION ) );
+		add_action( 'wp_ajax_nopriv_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, array( $this, Settings::PUBLIC_FORM_SUBMIT_ACTION ) );
 		add_shortcode( 'profile_submit_pro', array( $this, 'profile_submit_pro_shortcode' ) );
-		add_action( 'wp_footer', array( $this, 'check_profile_shortcode_removal' ) );  // Hook to check shortcode removal
+		add_action( 'wp_footer', array( $this, 'check_profile_shortcode_removal' ) ); // Hook to check shortcode removal
 	}
 
 	public function profile_submit_pro_shortcode( $atts ) {
@@ -63,9 +66,33 @@ class PublicController {
 		}
 	}
 
+	public function submit_profile_form_action() {
+		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( wp_unslash( $_POST['security'] ), 'submit_profile_form_action' ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid security token' ) );
+			wp_die();
+		}
 
-	public function submit_profile_action() {
-		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'my_action' ) ) {
+		$id = $_POST['id'];
+
+		$post_data = $_POST['post_data'];
+
+		if ( empty( $post_data ) ) {
+			wp_send_json_error( array( 'message' => 'No data received' ) );
+			wp_die();
+		}
+
+		wp_send_json_success( array( 'message' => 'Test.' ) );
+		wp_die();
+		return;
+		$submission = new Submission( $post_data );
+		$submission->update( $id );
+
+		wp_send_json_success( array( 'message' => 'Profile submitted successfully.' ) );
+		wp_die();
+	}
+
+	public function submit_public_form_action() {
+		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'submit_public_form_action' ) ) {
 			wp_send_json_error( array( 'message' => 'Invalid security token' ) );
 			wp_die();
 		}
@@ -101,18 +128,18 @@ class PublicController {
 		return $this->wpdb->get_var( $this->wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE DATE(submitted_at) = CURDATE()", $table_name ) );
 	}
 
-	public function enqueue_alpine_form() {
+	public function enqueue_public_form_translations() {
 		$form_translations = array(
 			'errors'       => array(
-				'name'        => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
-				'email'       => __( 'Invalid email address', 'your-text-domain' ),
-				'emailExists' => __( 'Email already exists', 'your-text-domain' ),
-				'username'    => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
+				'name'           => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
+				'email'          => __( 'Invalid email address', 'your-text-domain' ),
+				'emailExists'    => __( 'Email already exists', 'your-text-domain' ),
+				'username'       => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
 				'usernameExists' => __( 'Username already exists', 'your-text-domain' ),
-				'password'    => __( 'Password must have at least 8 characters, including letters and numbers', 'your-text-domain' ),
-				'phone'       => __( 'Invalid phone number', 'your-text-domain' ),
-				'birthDate'   => __( 'It must be a valid date', 'your-text-domain' ),
-				'address'     => array(
+				'password'       => __( 'Password must have at least 8 characters, including letters and numbers', 'your-text-domain' ),
+				'phone'          => __( 'Invalid phone number', 'your-text-domain' ),
+				'birthDate'      => __( 'It must be a valid date', 'your-text-domain' ),
+				'address'        => array(
 					'street'  => __( 'Street is too short', 'your-text-domain' ),
 					'unit'    => __( 'Unit is too short', 'your-text-domain' ),
 					'city'    => __( 'City is too short', 'your-text-domain' ),
@@ -120,10 +147,10 @@ class PublicController {
 					'zipCode' => __( 'ZipCode is too short', 'your-text-domain' ),
 					'country' => __( 'Select a country', 'your-text-domain' ),
 				),
-				'interests'   => __( 'Please select at least 3 interests', 'your-text-domain' ),
-				'cv'          => __( 'Your CV must be at least 20 characters long', 'your-text-domain' ),
-				'formSuccess' => __( 'Form submitted successfully!', 'your-text-domain' ),
-				'formError'   => __( 'Please correct the errors before submitting', 'your-text-domain' ),
+				'interests'      => __( 'Please select at least 3 interests', 'your-text-domain' ),
+				'cv'             => __( 'Your CV must be at least 20 characters long', 'your-text-domain' ),
+				'formSuccess'    => __( 'Form submitted successfully!', 'your-text-domain' ),
+				'formError'      => __( 'Please correct the errors before submitting', 'your-text-domain' ),
 			),
 			'placeholders' => array(
 				'name'       => __( 'Your name', 'your-text-domain' ),
@@ -140,9 +167,9 @@ class PublicController {
 		);
 
 		$form_config = array(
-			'action'   => 'submit_profile_action',
+			'action'   => 'submit_public_form_action',
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
-			'security' => wp_create_nonce( 'my_action' ),
+			'security' => wp_create_nonce( 'submit_public_form_action' ),
 		);
 
 		wp_localize_script(
@@ -151,6 +178,57 @@ class PublicController {
 			$form_translations
 		);
 		wp_localize_script( $this->plugin_name, 'formConfig', $form_config );
+	}
+
+	public function enqueue_profile_form_translations() {
+		$form_translations = array(
+			'errors'       => array(
+				'name'           => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
+				'email'          => __( 'Invalid email address', 'your-text-domain' ),
+				'emailExists'    => __( 'Email already exists', 'your-text-domain' ),
+				'username'       => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
+				'usernameExists' => __( 'Username already exists', 'your-text-domain' ),
+				'phone'          => __( 'Invalid phone number', 'your-text-domain' ),
+				'birthDate'      => __( 'It must be a valid date', 'your-text-domain' ),
+				'address'        => array(
+					'street'  => __( 'Street is too short', 'your-text-domain' ),
+					'unit'    => __( 'Unit is too short', 'your-text-domain' ),
+					'city'    => __( 'City is too short', 'your-text-domain' ),
+					'state'   => __( 'State is too short', 'your-text-domain' ),
+					'zipCode' => __( 'ZipCode is too short', 'your-text-domain' ),
+					'country' => __( 'Select a country', 'your-text-domain' ),
+				),
+				'interests'      => __( 'Please select at least 3 interests', 'your-text-domain' ),
+				'cv'             => __( 'Your CV must be at least 20 characters long', 'your-text-domain' ),
+				'formSuccess'    => __( 'Form submitted successfully!', 'your-text-domain' ),
+				'formError'      => __( 'Please correct the errors before submitting', 'your-text-domain' ),
+			),
+			'placeholders' => array(
+				'name'       => __( 'Your name', 'your-text-domain' ),
+				'email'      => __( 'Your email', 'your-text-domain' ),
+				'username'   => __( 'Your username', 'your-text-domain' ),
+				'phone'      => __( 'Your phone number', 'your-text-domain' ),
+				'birthDate'  => __( 'Your date of birth', 'your-text-domain' ),
+				'address'    => __( 'Your address', 'your-text-domain' ),
+				'interests'  => __( 'Your interests', 'your-text-domain' ),
+				'cv'         => __( 'Your CV', 'your-text-domain' ),
+				'dateFormat' => __( 'mm/dd/yyyy', 'your-text-domain' ),
+			),
+		);
+
+		$form_config = array(
+			'action'       => 'submit_profile_form_action',
+			'ajax_url'     => admin_url( 'admin-ajax.php' ),
+			'security'     => wp_create_nonce( 'submit_profile_form_action' ),
+			'redirect_url' => '/',
+		);
+
+		wp_localize_script(
+			$this->plugin_name,
+			'profileFormTranslations',
+			$form_translations
+		);
+		wp_localize_script( $this->plugin_name, 'profileFormConfig', $form_config );
 	}
 
 	public function enqueue_scripts() {
@@ -179,7 +257,8 @@ class PublicController {
 				'all'
 			);
 
-			$this->enqueue_alpine_form();
+			$this->enqueue_public_form_translations();
+			$this->enqueue_profile_form_translations();
 		}
 	}
 

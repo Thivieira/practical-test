@@ -4,6 +4,25 @@ namespace ProfileSubmitPro;
 
 class SubmissionManager {
 
+
+	public static function get_user_id_from_public_key( $public_key ) {
+		global $wpdb;
+		$submission_repository = new SubmissionRepository();
+		return $submission_repository->get_submission_attribute( 'wordpress_user_id', 'public_key', $public_key );
+	}
+
+	public static function get_public_key_from_user_id( $user_id ) {
+		global $wpdb;
+		$submission_repository = new SubmissionRepository();
+		return $submission_repository->get_submission_attribute( 'public_key', 'wordpress_user_id', $user_id );
+	}
+
+	public static function get_profile_from_user_id( $user_id ) {
+		global $wpdb;
+		$submission_repository = new SubmissionRepository();
+		return $submission_repository->get_profile_from_user_id( $user_id );
+	}
+
 	public static function is_public_key_valid( $public_key ) {
 		global $wpdb;
 

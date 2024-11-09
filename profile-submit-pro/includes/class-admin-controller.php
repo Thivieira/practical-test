@@ -23,6 +23,9 @@ class AdminController {
 		add_action( 'wp_ajax_get_plugin_settings', array( $this, 'get_plugin_settings' ) );
 		add_action( 'wp_ajax_update_plugin_settings', array( $this, 'update_plugin_settings' ) );
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+		add_action( 'show_user_profile', array( $this, 'render_profile_in_user_account' ) );
+		add_action( 'edit_user_profile', array( $this, 'render_profile_in_user_account' ) );
+		add_action( 'wp_ajax_delete_submission', array( $this, 'delete_submission' ) );
 	}
 
 	public function add_admin_menu() {
@@ -57,6 +60,17 @@ class AdminController {
 		);
 	}
 
+	public function render_profile_in_user_account( $user ) {
+		$public_key       = SubmissionManager::get_public_key_from_user_id( $user->ID );
+		$edit_profile_url = get_option( 'profile_submit_pro_shortcode_url' ) . '?key=' . $public_key;
+
+		if ( $public_key ) {
+			$profile = SubmissionManager::get_profile_from_user_id( $user->ID );
+			require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-link.php';
+			require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-show.php';
+		}
+	}
+
 	public function render_admin_page() {
 		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/settings-page.php';
 	}
@@ -79,6 +93,9 @@ class AdminController {
 			'submissions' => $submissions,
 			'pagination'  => $pagination,
 		);
+	}
+
+	public function delete_submission() {
 	}
 
 	public function get_pagination( $limit = 10, $offset = 0 ) {
@@ -113,7 +130,7 @@ class AdminController {
 
 	public function update_plugin_settings() {
 
-		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'my_action' ) ) {
+		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'update_plugin_settings' ) ) {
 			wp_send_json_error( array( 'message' => 'Invalid security token' ) );
 			wp_die();
 		}
@@ -137,15 +154,15 @@ class AdminController {
 	public function enqueue_alpine_form() {
 		$form_translations = array(
 			'errors'       => array(
-				'name'        => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
-				'email'       => __( 'Invalid email address', 'your-text-domain' ),
-				'emailExists' => __( 'Email already exists', 'your-text-domain' ),
-				'username'    => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
+				'name'           => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
+				'email'          => __( 'Invalid email address', 'your-text-domain' ),
+				'emailExists'    => __( 'Email already exists', 'your-text-domain' ),
+				'username'       => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
 				'usernameExists' => __( 'Username already exists', 'your-text-domain' ),
-				'password'    => __( 'Password must have at least 8 characters, including letters and numbers', 'your-text-domain' ),
-				'phone'       => __( 'Invalid phone number', 'your-text-domain' ),
-				'birthDate'   => __( 'It must be a valid date', 'your-text-domain' ),
-				'address'     => array(
+				'password'       => __( 'Password must have at least 8 characters, including letters and numbers', 'your-text-domain' ),
+				'phone'          => __( 'Invalid phone number', 'your-text-domain' ),
+				'birthDate'      => __( 'It must be a valid date', 'your-text-domain' ),
+				'address'        => array(
 					'street'  => __( 'Street is too short', 'your-text-domain' ),
 					'unit'    => __( 'Unit is too short', 'your-text-domain' ),
 					'city'    => __( 'City is too short', 'your-text-domain' ),
@@ -153,10 +170,10 @@ class AdminController {
 					'zipCode' => __( 'ZipCode is too short', 'your-text-domain' ),
 					'country' => __( 'Select a country', 'your-text-domain' ),
 				),
-				'interests'   => __( 'Please select at least 3 interests', 'your-text-domain' ),
-				'cv'          => __( 'Your CV must be at least 20 characters long', 'your-text-domain' ),
-				'formSuccess' => __( 'Form submitted successfully!', 'your-text-domain' ),
-				'formError'   => __( 'Please correct the errors before submitting', 'your-text-domain' ),
+				'interests'      => __( 'Please select at least 3 interests', 'your-text-domain' ),
+				'cv'             => __( 'Your CV must be at least 20 characters long', 'your-text-domain' ),
+				'formSuccess'    => __( 'Form submitted successfully!', 'your-text-domain' ),
+				'formError'      => __( 'Please correct the errors before submitting', 'your-text-domain' ),
 			),
 			'placeholders' => array(
 				'name'       => __( 'Your name', 'your-text-domain' ),
@@ -173,9 +190,10 @@ class AdminController {
 		);
 
 		$form_config = array(
-			'action'   => 'update_plugin_settings',
-			'ajax_url' => admin_url( 'admin-ajax.php' ),
-			'security' => wp_create_nonce( 'my_action' ),
+			'action'       => 'update_plugin_settings',
+			'ajax_url'     => admin_url( 'admin-ajax.php' ),
+			'security'     => wp_create_nonce( 'update_plugin_settings' ),
+			'redirect_url' => '/',
 		);
 
 		wp_localize_script(

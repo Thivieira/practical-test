@@ -1,4 +1,4 @@
-<div class="container mx-auto py-4">
+<div class="mx-auto py-4">
 	<div class="bg-white shadow-md rounded-md p-4 mb-4">
 		<div class="my-4 w-full md:w-1/3">
 			<label for="notification_email_from" class="block text-sm font-medium text-gray-700 mb-2">Notification e-mail from address</label>

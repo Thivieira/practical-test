@@ -3,6 +3,8 @@
 namespace ProfileSubmitPro;
 
 class Submission {
+
+
 	private $validator;
 	private $repository;
 	private $notifier;
@@ -38,6 +40,8 @@ class Submission {
 		add_action( 'wp_ajax_nopriv_verify_email_exists', array( $this, 'verify_email_exists' ) );
 		add_action( 'wp_ajax_verify_username_exists', array( $this, 'verify_username_exists' ) );
 		add_action( 'wp_ajax_nopriv_verify_username_exists', array( $this, 'verify_username_exists' ) );
+		add_action( 'wp_ajax_get_profile', array( $this, 'get_profile' ) );
+		add_action( 'wp_ajax_nopriv_get_profile', array( $this, 'get_profile' ) );
 	}
 
 	public function handle_api_submission( WP_REST_Request $request ) {
@@ -64,6 +68,21 @@ class Submission {
 		}
 
 		$email = sanitize_email( $_POST['email'] );
+
+		$id = $_POST['id'];
+		if ( ! empty( $id ) ) {
+			$existing_user_email = $this->repository->get_submission_attribute( 'email', 'id', $id );
+			if ( $existing_user_email === $email ) {
+				wp_send_json_success(
+					array(
+						'exists'  => false,
+						'message' => 'Email does not exist',
+					)
+				);
+				wp_die();
+				return;
+			}
+		}
 
 		// Query the database to check if the email exists
 		$user = $this->repository->verify_email_exists( $email );
@@ -96,15 +115,79 @@ class Submission {
 
 		$username = sanitize_user( $_POST['username'] );
 
+		$id = $_POST['id'];
+		if ( ! empty( $id ) ) {
+			$existing_user_username = $this->repository->get_submission_attribute( 'username', 'id', $id );
+			if ( $existing_user_username === $username ) {
+				wp_send_json_success(
+					array(
+						'exists'  => false,
+						'message' => 'Username does not exist',
+					)
+				);
+				wp_die();
+				return;
+			}
+		}
+
 		$user = $this->repository->verify_username_exists( $username );
 
 		if ( $user ) {
-			wp_send_json_success( array( 'exists' => true, 'message' => 'Username exists' ) );
+			wp_send_json_success(
+				array(
+					'exists'  => true,
+					'message' => 'Username exists',
+				)
+			);
 		} else {
-			wp_send_json_success( array( 'exists' => false, 'message' => 'Username does not exist' ) );
+			wp_send_json_success(
+				array(
+					'exists'  => false,
+					'message' => 'Username does not exist',
+				)
+			);
 		}
 
 		wp_die();
+	}
+
+	public function get_profile() {
+		$user_id = SubmissionManager::get_user_id_from_public_key( $_POST['public_key'] );
+
+		if ( ! $user_id ) {
+			return wp_send_json_error(
+				array(
+					'message' => 'Profile not found',
+				),
+				404
+			);
+
+		}
+
+		$current_user_id = get_current_user_id();
+		$is_admin        = current_user_can( 'administrator' );
+
+		if ( $user_id !== $current_user_id && ! $is_admin ) {
+			return wp_send_json_error(
+				array(
+					'message' => 'Profile not found',
+				),
+				403
+			);
+		}
+
+		$profile = $this->repository->get_profile_from_user_id( $user_id );
+
+		if ( ! $profile ) {
+			return wp_send_json_error(
+				array(
+					'message' => 'Profile not found',
+				),
+				404
+			);
+		}
+
+		return wp_send_json_success( $profile, 200 );
 	}
 
 	private function prepare_data() {
@@ -117,7 +200,7 @@ class Submission {
 		$email      = sanitize_email( $this->post_data['email'] );
 		$username   = sanitize_user( $this->post_data['username'] );
 		$phone      = sanitize_text_field( $this->post_data['phone'] );
-		$birth_date = sanitize_text_field( $this->post_data['birthDate'] );
+		$birth_date = \DateTime::createFromFormat( 'm/d/Y', $this->post_data['birthDate'] )->format( 'Y-m-d' );
 
 		$street   = sanitize_text_field( $this->post_data['address']['street'] );
 		$unit     = sanitize_text_field( $this->post_data['address']['unit'] );
@@ -152,7 +235,7 @@ class Submission {
 		);
 
 		$prepared_data = $this->wpdb->prepare(
-			"INSERT INTO {$table_name} (name, email, username, phone, birthdate, street, street_number, city, state, postal_code, country, interests, cv, public_key, submitted_at) 
+			"INSERT INTO {$table_name} (name, email, username, phone, birthdate, street, street_number, city, state, postal_code, country, interests, cv, public_key, submitted_at)
 			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 			array_values( $input_data )
 		);
@@ -169,5 +252,13 @@ class Submission {
 		$input_data    = $data[1];
 
 		$this->repository->save( $prepared_data, $input_data );
+	}
+
+	public function update( $id ) {
+		$data          = $this->prepare_data();
+		$prepared_data = $data[0];
+		$input_data    = $data[1];
+
+		$this->repository->update( $prepared_data, $input_data, $id );
 	}
 }
