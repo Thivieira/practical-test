@@ -142,10 +142,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"8I3Ue":[function(require,module,exports) {
+})({"8gSz4":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
-var HMR_PORT = 42853;
+var HMR_PORT = 34915;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
@@ -587,233 +587,14 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _alpinejs = require("alpinejs");
 var _alpinejsDefault = parcelHelpers.interopDefault(_alpinejs);
-var _sweetalert2 = require("sweetalert2");
-var _sweetalert2Default = parcelHelpers.interopDefault(_sweetalert2);
-var _intlTelInput = require("intl-tel-input");
-var _intlTelInputDefault = parcelHelpers.interopDefault(_intlTelInput);
+var _profile = require("./profile");
+var _publicForm = require("./public-form");
 if (module.hot) module.hot.accept();
-(0, _alpinejsDefault.default).data("formHandler", formHandler);
-// Helper function to check if an error object is empty
-const isErrorObjectEmpty = (error)=>{
-    return typeof error === "object" && Object.values(error).every((e)=>e === "");
-};
-function formHandler() {
-    return {
-        formData: {
-            name: "Thiago",
-            email: "thiago.a.vieira@hotmail.com",
-            username: "Thivieira",
-            password: "s1n2d3r4",
-            phone: "48991541005",
-            birthDate: "06/06/1997",
-            address: {
-                street: "St Chroma",
-                unit: "12",
-                city: "Blumenau",
-                state: "SC",
-                zipCode: "89010000",
-                country: "BR"
-            },
-            interests: [
-                "Music",
-                "Sports",
-                "Science"
-            ],
-            cv: "ewter53w45t4345345534354"
-        },
-        errors: {},
-        countries: window.countries || [],
-        translations: window.formTranslations,
-        dateFormat: window.formTranslations.placeholders.dateFormat,
-        config: window.formConfig,
-        loading: false,
-        init () {
-            const input = document.querySelector("#phone");
-            if (input) (0, _intlTelInputDefault.default)(input, {
-                initialCountry: "auto",
-                containerClass: "iti w-full",
-                geoIpLookup: (callback)=>{
-                    fetch("https://ipapi.co/json").then((res)=>res.json()).then((data)=>{
-                        callback(data.country_code);
-                        this.formData.address.country = data.country;
-                    }).catch(()=>{
-                        callback("us");
-                        this.formData.address.country = "US";
-                    });
-                },
-                loadUtilsOnInit: ()=>require("43319b2b8dd422bb")
-            });
-            fetch("/wp-content/plugins/profile-submit-pro/assets/countries.json", {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }).then((res)=>res.json()).then((data)=>{
-                this.countries = data;
-            }).catch((error)=>{
-                console.error("Error loading countries:", error);
-                this.countries = [];
-            });
-        },
-        validateName () {
-            this.errors.name = this.formData.name.length < 3 ? this.translations.errors.name : "";
-        },
-        validateEmail () {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            this.errors.email = !emailRegex.test(this.formData.email) ? this.translations.errors.email : "";
-        },
-        async validateEmailExists () {
-            const data = {
-                action: "verify_email_exists",
-                security: this.config.security,
-                email: this.formData.email
-            };
-            try {
-                const response = await fetch(this.config.ajax_url, {
-                    method: "POST",
-                    body: new URLSearchParams(data)
-                });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const responseData = await response.json();
-                if (responseData.data.exists) {
-                    this.errors.email = this.translations.errors.emailExists;
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                console.error("Error verifying email exists:", error);
-                this.errors.email = "Error verifying email exists";
-                return false;
-            }
-        },
-        validateUsername () {
-            this.errors.username = this.formData.username.length < 3 ? this.translations.errors.username : "";
-        },
-        async validateUsernameExists () {
-            const data = {
-                action: "verify_username_exists",
-                security: this.config.security,
-                username: this.formData.username
-            };
-            try {
-                const response = await fetch(this.config.ajax_url, {
-                    method: "POST",
-                    body: new URLSearchParams(data)
-                });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const responseData = await response.json();
-                if (responseData.data.exists) {
-                    this.errors.username = this.translations.errors.usernameExists;
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                console.error("Error verifying username exists:", error);
-                this.errors.username = "Error verifying username exists";
-            }
-        },
-        validatePassword () {
-            // Password must have at least 8 characters, including letters and numbers
-            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-            this.errors.password = !passwordRegex.test(this.formData.password) ? this.translations.errors.password : "";
-        },
-        validatePhone () {
-            // Clean the phone number by removing spaces and dashes
-            const cleanPhone = this.formData.phone.replace(/[\s-]/g, "");
-            // Regex for Brazilian phone numbers:
-            // - 2 digits for area code (11-99)
-            // - 8-9 digits for phone number
-            const phoneRegex = /^([1-9]{2})(9?\d{8})$/;
-            this.errors.phone = !phoneRegex.test(cleanPhone) ? this.translations.errors.phone : "";
-        },
-        validateAddress () {
-            this.errors.address = {};
-            this.errors.address.street = this.formData.address.street ? "" : this.translations.errors.address.street;
-            this.errors.address.unit = this.formData.address.unit ? "" : this.translations.errors.address.unit;
-            this.errors.address.city = this.formData.address.city ? "" : this.translations.errors.address.city;
-            this.errors.address.state = this.formData.address.state ? "" : this.translations.errors.address.state;
-            this.errors.address.zipCode = this.formData.address.zipCode ? "" : this.translations.errors.address.zipCode;
-            this.errors.address.country = this.formData.address.country ? "" : this.translations.errors.address.country;
-        },
-        validateInterests () {
-            this.errors.interests = this.formData.interests.length < 3 ? this.translations.errors.interests : "";
-        },
-        validateCv () {
-            this.errors.cv = this.formData.cv.length < 20 ? this.translations.errors.cv : "";
-        },
-        formatAndValidateBirthdate () {
-            this.formData.birthDate = this.formData.birthDate.replace(/(\d{2})(\d{2})(\d{4})/, "$1/$2/$3");
-            this.validateBirthdate();
-        },
-        validateBirthdate () {
-            if (!this.formData.birthDate) {
-                this.errors.birthDate = this.translations.errors.birthDate;
-                return;
-            }
-            const parsedDate = new Date(this.formData.birthDate);
-            if (isNaN(parsedDate.getTime())) this.errors.birthDate = this.translations.errors.birthDate;
-            else this.errors.birthDate = "";
-        },
-        async validateForm () {
-            // Run all validations first
-            this.validateName();
-            this.validateEmail();
-            this.validateUsername();
-            this.validatePassword();
-            this.validatePhone();
-            this.validateBirthdate();
-            this.validateAddress();
-            this.validateInterests();
-            this.validateCv();
-            await this.validateEmailExists();
-            await this.validateUsernameExists();
-            const valid = Object.values(this.errors).every((error)=>error === "" || isErrorObjectEmpty(error));
-            if (!valid) {
-                (0, _sweetalert2Default.default).fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: this.translations.errors.formError
-                });
-                return false;
-            }
-            this.loading = true;
-            try {
-                const data = {
-                    action: this.config.action,
-                    security: this.config.security,
-                    post_data: JSON.stringify(this.formData)
-                };
-                const response = await fetch(this.config.ajax_url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    },
-                    body: new URLSearchParams(data)
-                });
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                const responseData = await response.json();
-                console.log(responseData);
-                (0, _sweetalert2Default.default).fire({
-                    icon: "success",
-                    title: "Success!",
-                    text: this.translations.errors.formSuccess
-                });
-            } catch (error) {
-                console.error("There was a problem with your fetch operation:", error);
-                (0, _sweetalert2Default.default).fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "There was a problem in the server. Please try again later."
-                });
-                return false;
-            }
-            this.loading = false;
-            return true;
-        }
-    };
-}
+(0, _alpinejsDefault.default).data("profileFormHandler", (0, _profile.profileFormHandler));
+(0, _alpinejsDefault.default).data("formHandler", (0, _publicForm.formHandler));
 (0, _alpinejsDefault.default).start();
 
-},{"alpinejs":"69hXP","sweetalert2":"1HyFr","intl-tel-input":"lXOeg","43319b2b8dd422bb":"29ysN","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}],"69hXP":[function(require,module,exports) {
+},{"alpinejs":"69hXP","./profile":"1MUGo","./public-form":"ax8Y7","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}],"69hXP":[function(require,module,exports) {
 // packages/alpinejs/src/scheduler.js
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -3875,7 +3656,265 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"1HyFr":[function(require,module,exports) {
+},{}],"1MUGo":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "profileFormHandler", ()=>profileFormHandler);
+var _sweetalert2 = require("sweetalert2");
+var _sweetalert2Default = parcelHelpers.interopDefault(_sweetalert2);
+var _intlTelInput = require("intl-tel-input");
+var _intlTelInputDefault = parcelHelpers.interopDefault(_intlTelInput);
+var _utils = require("../utils");
+function profileFormHandler() {
+    return {
+        originalProfile: null,
+        formData: {
+            name: "",
+            email: "",
+            username: "",
+            phone: "",
+            birthDate: "",
+            address: {
+                street: "",
+                unit: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                country: ""
+            },
+            interests: [],
+            cv: ""
+        },
+        errors: {},
+        countries: window.countries || [],
+        translations: window.profileFormTranslations,
+        dateFormat: window.profileFormTranslations.placeholders.dateFormat,
+        config: window.profileFormConfig,
+        loading: false,
+        async init () {
+            const input = document.querySelector("#phone");
+            if (input) (0, _intlTelInputDefault.default)(input, {
+                initialCountry: "auto",
+                containerClass: "iti w-full",
+                geoIpLookup: (callback)=>{
+                    fetch("https://ipapi.co/json").then((res)=>res.json()).then((data)=>{
+                        callback(data.country_code);
+                        this.formData.address.country = data.country;
+                    }).catch(()=>{
+                        callback("us");
+                        this.formData.address.country = "US";
+                    });
+                },
+                loadUtilsOnInit: ()=>require("df10d156dba4c174")
+            });
+            fetch("/wp-content/plugins/profile-submit-pro/assets/countries.json", {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then((res)=>res.json()).then((data)=>{
+                this.countries = data;
+            }).catch((error)=>{
+                console.error("Error loading countries:", error);
+                this.countries = [];
+            });
+            const searchParams = new URLSearchParams(window.location.search);
+            const profileResponse = await fetch(this.config.ajax_url, {
+                method: "POST",
+                body: new URLSearchParams({
+                    action: "get_profile",
+                    security: this.config.security,
+                    public_key: searchParams.get("key") || ""
+                })
+            });
+            const profileJson = await profileResponse.json();
+            const profileData = profileJson.data;
+            let interests = JSON.parse(profileData.interests);
+            interests = interests.map((interest)=>interest.toLowerCase());
+            const preparedFormData = {
+                name: profileData.name,
+                email: profileData.email,
+                username: profileData.username,
+                phone: profileData.phone,
+                birthDate: (0, _utils.formatDate)(profileData.birthdate),
+                address: {
+                    street: profileData.street,
+                    unit: profileData.street_number,
+                    city: profileData.city,
+                    state: profileData.state,
+                    zipCode: profileData.postal_code,
+                    country: profileData.country
+                },
+                interests: interests,
+                cv: profileData.cv
+            };
+            this.formData = preparedFormData;
+            this.config.id = profileData.id;
+            // Create a deep copy of preparedFormData for originalProfile, to avoid reference issues
+            this.originalProfile = JSON.parse(JSON.stringify(preparedFormData));
+        },
+        validateName () {
+            this.errors.name = this.formData.name.length < 3 ? this.translations.errors.name : "";
+        },
+        validateEmail () {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            this.errors.email = !emailRegex.test(this.formData.email) ? this.translations.errors.email : "";
+        },
+        async validateEmailExists () {
+            const data = {
+                action: "verify_email_exists",
+                security: this.config.security,
+                email: this.formData.email,
+                id: this.config.id
+            };
+            try {
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                if (responseData.data.exists) {
+                    this.errors.email = this.translations.errors.emailExists;
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error verifying email exists:", error);
+                this.errors.email = "Error verifying email exists";
+                return false;
+            }
+        },
+        validateUsername () {
+            this.errors.username = this.formData.username.length < 3 ? this.translations.errors.username : "";
+        },
+        async validateUsernameExists () {
+            const data = {
+                action: "verify_username_exists",
+                security: this.config.security,
+                username: this.formData.username,
+                id: this.config.id
+            };
+            try {
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                if (responseData.data.exists) {
+                    this.errors.username = this.translations.errors.usernameExists;
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error verifying username exists:", error);
+                this.errors.username = "Error verifying username exists";
+            }
+        },
+        validatePhone () {
+            // Clean the phone number by removing spaces and dashes
+            const cleanPhone = this.formData.phone.replace(/[\s-]/g, "");
+            // Regex for Brazilian phone numbers:
+            // - 2 digits for area code (11-99)
+            // - 8-9 digits for phone number
+            const phoneRegex = /^([1-9]{2})(9?\d{8})$/;
+            this.errors.phone = !phoneRegex.test(cleanPhone) ? this.translations.errors.phone : "";
+        },
+        validateAddress () {
+            this.errors.address = {};
+            this.errors.address.street = this.formData.address.street ? "" : this.translations.errors.address.street;
+            this.errors.address.unit = this.formData.address.unit ? "" : this.translations.errors.address.unit;
+            this.errors.address.city = this.formData.address.city ? "" : this.translations.errors.address.city;
+            this.errors.address.state = this.formData.address.state ? "" : this.translations.errors.address.state;
+            this.errors.address.zipCode = this.formData.address.zipCode ? "" : this.translations.errors.address.zipCode;
+            this.errors.address.country = this.formData.address.country ? "" : this.translations.errors.address.country;
+        },
+        validateInterests () {
+            this.errors.interests = this.formData.interests.length < 3 ? this.translations.errors.interests : "";
+        },
+        validateCv () {
+            this.errors.cv = this.formData.cv.length < 20 ? this.translations.errors.cv : "";
+        },
+        formatAndValidateBirthdate () {
+            this.formData.birthDate = (0, _utils.formatDate)(this.formData.birthDate, this.dateFormat);
+            this.validateBirthdate();
+        },
+        validateBirthdate () {
+            if (!this.formData.birthDate) {
+                this.errors.birthDate = this.translations.errors.birthDate;
+                return;
+            }
+            const parsedDate = new Date(this.formData.birthDate);
+            if (isNaN(parsedDate.getTime())) this.errors.birthDate = this.translations.errors.birthDate;
+            else this.errors.birthDate = "";
+        },
+        validateIfFormIsChanged () {
+            console.log("FormIsChanged: ", JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile));
+            console.log({
+                unit: this.formData.address.unit,
+                originalUnit: this.originalProfile.address.unit
+            });
+            return JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile);
+        },
+        async validateForm () {
+            if (!this.validateIfFormIsChanged()) return true;
+            this.validateName();
+            this.validateEmail();
+            this.validateUsername();
+            this.validatePhone();
+            this.validateBirthdate();
+            this.validateAddress();
+            this.validateInterests();
+            this.validateCv();
+            await this.validateEmailExists();
+            await this.validateUsernameExists();
+            const valid = Object.values(this.errors).every((error)=>error === "" || (0, _utils.isErrorObjectEmpty)(error));
+            if (!valid) {
+                (0, _sweetalert2Default.default).fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: this.translations.errors.formError
+                });
+                return false;
+            }
+            this.loading = true;
+            try {
+                const data = {
+                    action: this.config.action,
+                    security: this.config.security,
+                    post_data: JSON.stringify(this.formData),
+                    id: this.config.id
+                };
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                (0, _sweetalert2Default.default).fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: this.translations.errors.formSuccess
+                });
+            } catch (error) {
+                console.error("There was a problem with your fetch operation:", error);
+                (0, _sweetalert2Default.default).fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "There was a problem in the server. Please try again later."
+                });
+                return false;
+            }
+            this.loading = false;
+            return true;
+        }
+    };
+}
+
+},{"sweetalert2":"1HyFr","intl-tel-input":"lXOeg","../utils":"hFIk5","df10d156dba4c174":"29ysN","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}],"1HyFr":[function(require,module,exports) {
 /*!
 * sweetalert2 v11.14.4
 * Released under the MIT License.
@@ -10446,6 +10485,380 @@ if (typeof this !== "undefined" && this.Sweetalert2) this.swal = this.sweetAlert
     return factoryOutput.default;
 });
 
+},{}],"hFIk5":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "isErrorObjectEmpty", ()=>isErrorObjectEmpty);
+parcelHelpers.export(exports, "formatDate", ()=>formatDate);
+var _dayjs = require("./dayjs");
+var _dayjsDefault = parcelHelpers.interopDefault(_dayjs);
+const isErrorObjectEmpty = (error)=>{
+    return typeof error === "object" && Object.values(error).every((e)=>e === "");
+};
+const formatDate = (date, format = "DD/MM/YYYY")=>{
+    if (!date) return "";
+    return (0, _dayjsDefault.default)(date).format(format);
+};
+
+},{"./dayjs":"77bWH","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}],"77bWH":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _dayjs = require("dayjs");
+var _dayjsDefault = parcelHelpers.interopDefault(_dayjs);
+exports.default = (0, _dayjsDefault.default);
+
+},{"dayjs":"NJZFB","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}],"NJZFB":[function(require,module,exports) {
+!function(t, e) {
+    module.exports = e();
+}(this, function() {
+    "use strict";
+    var t = 1e3, e = 6e4, n = 36e5, r = "millisecond", i = "second", s = "minute", u = "hour", a = "day", o = "week", c = "month", f = "quarter", h = "year", d = "date", l = "Invalid Date", $ = /^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/, y = /\[([^\]]+)]|Y{1,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g, M = {
+        name: "en",
+        weekdays: "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),
+        months: "January_February_March_April_May_June_July_August_September_October_November_December".split("_"),
+        ordinal: function(t) {
+            var e = [
+                "th",
+                "st",
+                "nd",
+                "rd"
+            ], n = t % 100;
+            return "[" + t + (e[(n - 20) % 10] || e[n] || e[0]) + "]";
+        }
+    }, m = function(t, e, n) {
+        var r = String(t);
+        return !r || r.length >= e ? t : "" + Array(e + 1 - r.length).join(n) + t;
+    }, v = {
+        s: m,
+        z: function(t) {
+            var e = -t.utcOffset(), n = Math.abs(e), r = Math.floor(n / 60), i = n % 60;
+            return (e <= 0 ? "+" : "-") + m(r, 2, "0") + ":" + m(i, 2, "0");
+        },
+        m: function t(e, n) {
+            if (e.date() < n.date()) return -t(n, e);
+            var r = 12 * (n.year() - e.year()) + (n.month() - e.month()), i = e.clone().add(r, c), s = n - i < 0, u = e.clone().add(r + (s ? -1 : 1), c);
+            return +(-(r + (n - i) / (s ? i - u : u - i)) || 0);
+        },
+        a: function(t) {
+            return t < 0 ? Math.ceil(t) || 0 : Math.floor(t);
+        },
+        p: function(t) {
+            return ({
+                M: c,
+                y: h,
+                w: o,
+                d: a,
+                D: d,
+                h: u,
+                m: s,
+                s: i,
+                ms: r,
+                Q: f
+            })[t] || String(t || "").toLowerCase().replace(/s$/, "");
+        },
+        u: function(t) {
+            return void 0 === t;
+        }
+    }, g = "en", D = {};
+    D[g] = M;
+    var p = "$isDayjsObject", S = function(t) {
+        return t instanceof _ || !(!t || !t[p]);
+    }, w = function t(e, n, r) {
+        var i;
+        if (!e) return g;
+        if ("string" == typeof e) {
+            var s = e.toLowerCase();
+            D[s] && (i = s), n && (D[s] = n, i = s);
+            var u = e.split("-");
+            if (!i && u.length > 1) return t(u[0]);
+        } else {
+            var a = e.name;
+            D[a] = e, i = a;
+        }
+        return !r && i && (g = i), i || !r && g;
+    }, O = function(t, e) {
+        if (S(t)) return t.clone();
+        var n = "object" == typeof e ? e : {};
+        return n.date = t, n.args = arguments, new _(n);
+    }, b = v;
+    b.l = w, b.i = S, b.w = function(t, e) {
+        return O(t, {
+            locale: e.$L,
+            utc: e.$u,
+            x: e.$x,
+            $offset: e.$offset
+        });
+    };
+    var _ = function() {
+        function M(t) {
+            this.$L = w(t.locale, null, !0), this.parse(t), this.$x = this.$x || t.x || {}, this[p] = !0;
+        }
+        var m = M.prototype;
+        return m.parse = function(t) {
+            this.$d = function(t) {
+                var e = t.date, n = t.utc;
+                if (null === e) return new Date(NaN);
+                if (b.u(e)) return new Date;
+                if (e instanceof Date) return new Date(e);
+                if ("string" == typeof e && !/Z$/i.test(e)) {
+                    var r = e.match($);
+                    if (r) {
+                        var i = r[2] - 1 || 0, s = (r[7] || "0").substring(0, 3);
+                        return n ? new Date(Date.UTC(r[1], i, r[3] || 1, r[4] || 0, r[5] || 0, r[6] || 0, s)) : new Date(r[1], i, r[3] || 1, r[4] || 0, r[5] || 0, r[6] || 0, s);
+                    }
+                }
+                return new Date(e);
+            }(t), this.init();
+        }, m.init = function() {
+            var t = this.$d;
+            this.$y = t.getFullYear(), this.$M = t.getMonth(), this.$D = t.getDate(), this.$W = t.getDay(), this.$H = t.getHours(), this.$m = t.getMinutes(), this.$s = t.getSeconds(), this.$ms = t.getMilliseconds();
+        }, m.$utils = function() {
+            return b;
+        }, m.isValid = function() {
+            return !(this.$d.toString() === l);
+        }, m.isSame = function(t, e) {
+            var n = O(t);
+            return this.startOf(e) <= n && n <= this.endOf(e);
+        }, m.isAfter = function(t, e) {
+            return O(t) < this.startOf(e);
+        }, m.isBefore = function(t, e) {
+            return this.endOf(e) < O(t);
+        }, m.$g = function(t, e, n) {
+            return b.u(t) ? this[e] : this.set(n, t);
+        }, m.unix = function() {
+            return Math.floor(this.valueOf() / 1e3);
+        }, m.valueOf = function() {
+            return this.$d.getTime();
+        }, m.startOf = function(t, e) {
+            var n = this, r = !!b.u(e) || e, f = b.p(t), l = function(t, e) {
+                var i = b.w(n.$u ? Date.UTC(n.$y, e, t) : new Date(n.$y, e, t), n);
+                return r ? i : i.endOf(a);
+            }, $ = function(t, e) {
+                return b.w(n.toDate()[t].apply(n.toDate("s"), (r ? [
+                    0,
+                    0,
+                    0,
+                    0
+                ] : [
+                    23,
+                    59,
+                    59,
+                    999
+                ]).slice(e)), n);
+            }, y = this.$W, M = this.$M, m = this.$D, v = "set" + (this.$u ? "UTC" : "");
+            switch(f){
+                case h:
+                    return r ? l(1, 0) : l(31, 11);
+                case c:
+                    return r ? l(1, M) : l(0, M + 1);
+                case o:
+                    var g = this.$locale().weekStart || 0, D = (y < g ? y + 7 : y) - g;
+                    return l(r ? m - D : m + (6 - D), M);
+                case a:
+                case d:
+                    return $(v + "Hours", 0);
+                case u:
+                    return $(v + "Minutes", 1);
+                case s:
+                    return $(v + "Seconds", 2);
+                case i:
+                    return $(v + "Milliseconds", 3);
+                default:
+                    return this.clone();
+            }
+        }, m.endOf = function(t) {
+            return this.startOf(t, !1);
+        }, m.$set = function(t, e) {
+            var n, o = b.p(t), f = "set" + (this.$u ? "UTC" : ""), l = (n = {}, n[a] = f + "Date", n[d] = f + "Date", n[c] = f + "Month", n[h] = f + "FullYear", n[u] = f + "Hours", n[s] = f + "Minutes", n[i] = f + "Seconds", n[r] = f + "Milliseconds", n)[o], $ = o === a ? this.$D + (e - this.$W) : e;
+            if (o === c || o === h) {
+                var y = this.clone().set(d, 1);
+                y.$d[l]($), y.init(), this.$d = y.set(d, Math.min(this.$D, y.daysInMonth())).$d;
+            } else l && this.$d[l]($);
+            return this.init(), this;
+        }, m.set = function(t, e) {
+            return this.clone().$set(t, e);
+        }, m.get = function(t) {
+            return this[b.p(t)]();
+        }, m.add = function(r, f) {
+            var d, l = this;
+            r = Number(r);
+            var $ = b.p(f), y = function(t) {
+                var e = O(l);
+                return b.w(e.date(e.date() + Math.round(t * r)), l);
+            };
+            if ($ === c) return this.set(c, this.$M + r);
+            if ($ === h) return this.set(h, this.$y + r);
+            if ($ === a) return y(1);
+            if ($ === o) return y(7);
+            var M = (d = {}, d[s] = e, d[u] = n, d[i] = t, d)[$] || 1, m = this.$d.getTime() + r * M;
+            return b.w(m, this);
+        }, m.subtract = function(t, e) {
+            return this.add(-1 * t, e);
+        }, m.format = function(t) {
+            var e = this, n = this.$locale();
+            if (!this.isValid()) return n.invalidDate || l;
+            var r = t || "YYYY-MM-DDTHH:mm:ssZ", i = b.z(this), s = this.$H, u = this.$m, a = this.$M, o = n.weekdays, c = n.months, f = n.meridiem, h = function(t, n, i, s) {
+                return t && (t[n] || t(e, r)) || i[n].slice(0, s);
+            }, d = function(t) {
+                return b.s(s % 12 || 12, t, "0");
+            }, $ = f || function(t, e, n) {
+                var r = t < 12 ? "AM" : "PM";
+                return n ? r.toLowerCase() : r;
+            };
+            return r.replace(y, function(t, r) {
+                return r || function(t) {
+                    switch(t){
+                        case "YY":
+                            return String(e.$y).slice(-2);
+                        case "YYYY":
+                            return b.s(e.$y, 4, "0");
+                        case "M":
+                            return a + 1;
+                        case "MM":
+                            return b.s(a + 1, 2, "0");
+                        case "MMM":
+                            return h(n.monthsShort, a, c, 3);
+                        case "MMMM":
+                            return h(c, a);
+                        case "D":
+                            return e.$D;
+                        case "DD":
+                            return b.s(e.$D, 2, "0");
+                        case "d":
+                            return String(e.$W);
+                        case "dd":
+                            return h(n.weekdaysMin, e.$W, o, 2);
+                        case "ddd":
+                            return h(n.weekdaysShort, e.$W, o, 3);
+                        case "dddd":
+                            return o[e.$W];
+                        case "H":
+                            return String(s);
+                        case "HH":
+                            return b.s(s, 2, "0");
+                        case "h":
+                            return d(1);
+                        case "hh":
+                            return d(2);
+                        case "a":
+                            return $(s, u, !0);
+                        case "A":
+                            return $(s, u, !1);
+                        case "m":
+                            return String(u);
+                        case "mm":
+                            return b.s(u, 2, "0");
+                        case "s":
+                            return String(e.$s);
+                        case "ss":
+                            return b.s(e.$s, 2, "0");
+                        case "SSS":
+                            return b.s(e.$ms, 3, "0");
+                        case "Z":
+                            return i;
+                    }
+                    return null;
+                }(t) || i.replace(":", "");
+            });
+        }, m.utcOffset = function() {
+            return 15 * -Math.round(this.$d.getTimezoneOffset() / 15);
+        }, m.diff = function(r, d, l) {
+            var $, y = this, M = b.p(d), m = O(r), v = (m.utcOffset() - this.utcOffset()) * e, g = this - m, D = function() {
+                return b.m(y, m);
+            };
+            switch(M){
+                case h:
+                    $ = D() / 12;
+                    break;
+                case c:
+                    $ = D();
+                    break;
+                case f:
+                    $ = D() / 3;
+                    break;
+                case o:
+                    $ = (g - v) / 6048e5;
+                    break;
+                case a:
+                    $ = (g - v) / 864e5;
+                    break;
+                case u:
+                    $ = g / n;
+                    break;
+                case s:
+                    $ = g / e;
+                    break;
+                case i:
+                    $ = g / t;
+                    break;
+                default:
+                    $ = g;
+            }
+            return l ? $ : b.a($);
+        }, m.daysInMonth = function() {
+            return this.endOf(c).$D;
+        }, m.$locale = function() {
+            return D[this.$L];
+        }, m.locale = function(t, e) {
+            if (!t) return this.$L;
+            var n = this.clone(), r = w(t, e, !0);
+            return r && (n.$L = r), n;
+        }, m.clone = function() {
+            return b.w(this.$d, this);
+        }, m.toDate = function() {
+            return new Date(this.valueOf());
+        }, m.toJSON = function() {
+            return this.isValid() ? this.toISOString() : null;
+        }, m.toISOString = function() {
+            return this.$d.toISOString();
+        }, m.toString = function() {
+            return this.$d.toUTCString();
+        }, M;
+    }(), k = _.prototype;
+    return O.prototype = k, [
+        [
+            "$ms",
+            r
+        ],
+        [
+            "$s",
+            i
+        ],
+        [
+            "$m",
+            s
+        ],
+        [
+            "$H",
+            u
+        ],
+        [
+            "$W",
+            a
+        ],
+        [
+            "$M",
+            c
+        ],
+        [
+            "$y",
+            h
+        ],
+        [
+            "$D",
+            d
+        ]
+    ].forEach(function(t) {
+        k[t[1]] = function(e) {
+            return this.$g(e, t[0], t[1]);
+        };
+    }), O.extend = function(t, e) {
+        return t.$i || (t(e, _, O), t.$i = !0), O;
+    }, O.locale = w, O.isDayjs = S, O.unix = function(t) {
+        return O(1e3 * t);
+    }, O.en = D[g], O.Ls = D, O.p = {}, O;
+});
+
 },{}],"29ysN":[function(require,module,exports) {
 module.exports = require("51d441ccc900ae89")(require("3c69496d0ba78563").getBundleURL("bkLX4") + "utils.a307ef1f.js" + "?" + Date.now()).catch((err)=>{
     delete module.bundle.cache[module.id];
@@ -10549,6 +10962,230 @@ exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
 
-},{}]},["8I3Ue","fyuRC"], "fyuRC", "parcelRequire4480")
+},{}],"ax8Y7":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "formHandler", ()=>formHandler);
+var _sweetalert2 = require("sweetalert2");
+var _sweetalert2Default = parcelHelpers.interopDefault(_sweetalert2);
+var _intlTelInput = require("intl-tel-input");
+var _intlTelInputDefault = parcelHelpers.interopDefault(_intlTelInput);
+var _utils = require("../utils");
+function formHandler() {
+    return {
+        formData: {
+            name: "",
+            email: "",
+            username: "",
+            password: "",
+            phone: "",
+            birthDate: "",
+            address: {
+                street: "",
+                unit: "",
+                city: "",
+                state: "",
+                zipCode: "",
+                country: ""
+            },
+            interests: [],
+            cv: ""
+        },
+        errors: {},
+        countries: window.countries || [],
+        translations: window.formTranslations,
+        dateFormat: window.formTranslations.placeholders.dateFormat,
+        config: window.formConfig,
+        loading: false,
+        init () {
+            const input = document.querySelector("#phone");
+            if (input) (0, _intlTelInputDefault.default)(input, {
+                initialCountry: "auto",
+                containerClass: "iti w-full",
+                geoIpLookup: (callback)=>{
+                    fetch("https://ipapi.co/json").then((res)=>res.json()).then((data)=>{
+                        callback(data.country_code);
+                        this.formData.address.country = data.country;
+                    }).catch(()=>{
+                        callback("us");
+                        this.formData.address.country = "US";
+                    });
+                },
+                loadUtilsOnInit: ()=>require("a22db7ce9cf196c6")
+            });
+            fetch("/wp-content/plugins/profile-submit-pro/assets/countries.json", {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then((res)=>res.json()).then((data)=>{
+                this.countries = data;
+            }).catch((error)=>{
+                console.error("Error loading countries:", error);
+                this.countries = [];
+            });
+        },
+        validateName () {
+            this.errors.name = this.formData.name.length < 3 ? this.translations.errors.name : "";
+        },
+        validateEmail () {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            this.errors.email = !emailRegex.test(this.formData.email) ? this.translations.errors.email : "";
+        },
+        async validateEmailExists () {
+            const data = {
+                action: "verify_email_exists",
+                security: this.config.security,
+                email: this.formData.email
+            };
+            try {
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                if (responseData.data.exists) {
+                    this.errors.email = this.translations.errors.emailExists;
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error verifying email exists:", error);
+                this.errors.email = "Error verifying email exists";
+                return false;
+            }
+        },
+        validateUsername () {
+            this.errors.username = this.formData.username.length < 3 ? this.translations.errors.username : "";
+        },
+        async validateUsernameExists () {
+            const data = {
+                action: "verify_username_exists",
+                security: this.config.security,
+                username: this.formData.username
+            };
+            try {
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const responseData = await response.json();
+                if (responseData.data.exists) {
+                    this.errors.username = this.translations.errors.usernameExists;
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error("Error verifying username exists:", error);
+                this.errors.username = "Error verifying username exists";
+            }
+        },
+        validatePassword () {
+            // Password must have at least 8 characters, including letters and numbers
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            this.errors.password = !passwordRegex.test(this.formData.password) ? this.translations.errors.password : "";
+        },
+        validatePhone () {
+            // Clean the phone number by removing spaces and dashes
+            const cleanPhone = this.formData.phone.replace(/[\s-]/g, "");
+            // Regex for Brazilian phone numbers:
+            // - 2 digits for area code (11-99)
+            // - 8-9 digits for phone number
+            const phoneRegex = /^([1-9]{2})(9?\d{8})$/;
+            this.errors.phone = !phoneRegex.test(cleanPhone) ? this.translations.errors.phone : "";
+        },
+        validateAddress () {
+            this.errors.address = {};
+            this.errors.address.street = this.formData.address.street ? "" : this.translations.errors.address.street;
+            this.errors.address.unit = this.formData.address.unit ? "" : this.translations.errors.address.unit;
+            this.errors.address.city = this.formData.address.city ? "" : this.translations.errors.address.city;
+            this.errors.address.state = this.formData.address.state ? "" : this.translations.errors.address.state;
+            this.errors.address.zipCode = this.formData.address.zipCode ? "" : this.translations.errors.address.zipCode;
+            this.errors.address.country = this.formData.address.country ? "" : this.translations.errors.address.country;
+        },
+        validateInterests () {
+            this.errors.interests = this.formData.interests.length < 3 ? this.translations.errors.interests : "";
+        },
+        validateCv () {
+            this.errors.cv = this.formData.cv.length < 20 ? this.translations.errors.cv : "";
+        },
+        formatAndValidateBirthdate () {
+            this.formData.birthDate = this.formData.birthDate.replace(/(\d{2})(\d{2})(\d{4})/, "$1/$2/$3");
+            this.validateBirthdate();
+        },
+        validateBirthdate () {
+            if (!this.formData.birthDate) {
+                this.errors.birthDate = this.translations.errors.birthDate;
+                return;
+            }
+            const parsedDate = new Date(this.formData.birthDate);
+            if (isNaN(parsedDate.getTime())) this.errors.birthDate = this.translations.errors.birthDate;
+            else this.errors.birthDate = "";
+        },
+        async validateForm () {
+            // Run all validations first
+            this.validateName();
+            this.validateEmail();
+            this.validateUsername();
+            this.validatePassword();
+            this.validatePhone();
+            this.validateBirthdate();
+            this.validateAddress();
+            this.validateInterests();
+            this.validateCv();
+            await this.validateEmailExists();
+            await this.validateUsernameExists();
+            const valid = Object.values(this.errors).every((error)=>error === "" || (0, _utils.isErrorObjectEmpty)(error));
+            if (!valid) {
+                (0, _sweetalert2Default.default).fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: this.translations.errors.formError
+                });
+                return false;
+            }
+            this.loading = true;
+            try {
+                const data = {
+                    action: this.config.action,
+                    security: this.config.security,
+                    post_data: JSON.stringify(this.formData)
+                };
+                const response = await fetch(this.config.ajax_url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: new URLSearchParams(data)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                this.formData = {};
+                (0, _sweetalert2Default.default).fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: this.translations.errors.formSuccess,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didClose: ()=>{
+                        window.location.href = this.config.redirect_url;
+                    }
+                });
+            } catch (error) {
+                console.error("There was a problem with your fetch operation:", error);
+                (0, _sweetalert2Default.default).fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "There was a problem in the server. Please try again later."
+                });
+                return false;
+            }
+            this.loading = false;
+            return true;
+        }
+    };
+}
+
+},{"sweetalert2":"1HyFr","intl-tel-input":"lXOeg","../utils":"hFIk5","a22db7ce9cf196c6":"29ysN","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}]},["8gSz4","fyuRC"], "fyuRC", "parcelRequire4480")
 
 //# sourceMappingURL=profile-submit-pro_public.js.map
