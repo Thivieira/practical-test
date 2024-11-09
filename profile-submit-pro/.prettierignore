@@ -1,0 +1,22 @@
+# Ignore artifacts:
+build
+coverage
+
+# Ignore vendor and node_modules
+vendor
+node_modules
+
+# Ignore js, css and json files
+*.js
+*.css
+*.json
+
+# Ignore lock files
+package-lock.json
+composer.lock
+
+# Ignore markdown files
+*.md
+
+# Ignore Prettier
+.prettierrc

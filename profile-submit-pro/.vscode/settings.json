@@ -1,0 +1,14 @@
+{
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000, // Adjust the delay as needed
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": ".*\\.php$",
+        "isAsync": true,
+        "cmd": "workbench.action.tasks.runTask",
+        "args": "Composer Format"
+      }
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 
 if (module.hot) {
   module.hot.accept();
@@ -9,10 +9,10 @@ Alpine.data('formHandler', formHandler);
 
 // Helper function to check if an error object is empty
 const isErrorObjectEmpty = (error: any): boolean => {
-  return typeof error === 'object' &&
-    Object.values(error).every(e => e === '');
+  return (
+    typeof error === 'object' && Object.values(error).every((e) => e === '')
+  );
 };
-
 
 function formHandler() {
   return {
@@ -33,7 +33,7 @@ function formHandler() {
       const response = await fetch(this.config.ajax_url, {
         method: 'POST',
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
           action: 'get_plugin_settings',
@@ -45,13 +45,11 @@ function formHandler() {
       this.formData = data.data;
     },
 
-
     async validateForm() {
       // Run all validations first
 
-
-      const valid = Object.values(this.errors).every(error =>
-        error === '' || isErrorObjectEmpty(error)
+      const valid = Object.values(this.errors).every(
+        (error) => error === '' || isErrorObjectEmpty(error),
       );
 
       if (!valid) {
@@ -63,19 +61,18 @@ function formHandler() {
         return false;
       }
 
-
       this.loading = true;
 
       try {
         const data = {
           action: this.config.action,
           security: this.config.security,
-          post_data: JSON.stringify(this.formData)
+          post_data: JSON.stringify(this.formData),
         };
         const response = await fetch(this.config.ajax_url, {
           method: 'POST',
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: new URLSearchParams(data),
         });
@@ -104,10 +101,8 @@ function formHandler() {
 
       this.loading = false;
 
-
       return true;
-
-    }
+    },
   };
 }
 
