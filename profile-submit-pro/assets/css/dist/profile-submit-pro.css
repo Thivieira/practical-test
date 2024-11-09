@@ -527,6 +527,10 @@ select {
   margin-bottom: -1px;
 }
 
+.mb-0 {
+  margin-bottom: 0;
+}
+
 .mb-2 {
   margin-bottom: .5rem;
 }
@@ -547,16 +551,20 @@ select {
   margin-left: .5rem;
 }
 
+.ml-\[2px\] {
+  margin-left: 2px;
+}
+
 .mr-2 {
   margin-right: .5rem;
 }
 
-.mt-1 {
-  margin-top: .25rem;
+.mr-\[20px\] {
+  margin-right: 20px;
 }
 
-.mt-10 {
-  margin-top: 2.5rem;
+.mt-1 {
+  margin-top: .25rem;
 }
 
 .mt-2 {
@@ -565,6 +573,10 @@ select {
 
 .mt-6 {
   margin-top: 1.5rem;
+}
+
+.mt-\[10px\] {
+  margin-top: 10px;
 }
 
 .block {
@@ -671,14 +683,6 @@ select {
   margin-left: calc(-1px * calc(1 - var(--tw-space-x-reverse)));
 }
 
-.space-y-12 > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: 3rem;
-  margin-top: calc(3rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: 0;
-  margin-bottom: calc(3rem * var(--tw-space-y-reverse));
-}
-
 .space-y-4 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: 1rem;
@@ -722,6 +726,11 @@ select {
 
 .border-0 {
   border-width: 0;
+}
+
+.border-y {
+  border-top-width: 1px;
+  border-bottom-width: 1px;
 }
 
 .border-b {
@@ -829,8 +838,8 @@ select {
   padding-bottom: 1rem;
 }
 
-.pb-12 {
-  padding-bottom: 3rem;
+.pb-6 {
+  padding-bottom: 1.5rem;
 }
 
 .pl-1 {
@@ -843,6 +852,10 @@ select {
 
 .pt-4 {
   padding-top: 1rem;
+}
+
+.pt-6 {
+  padding-top: 1.5rem;
 }
 
 .text-left {
@@ -860,11 +873,6 @@ select {
 
 .text-\[1\.5rem\] {
   font-size: 1.5rem;
-}
-
-.text-base\/7 {
-  font-size: 1rem;
-  line-height: 1.75rem;
 }
 
 .text-sm {
@@ -914,11 +922,6 @@ select {
 .text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity));
-}
-
-.text-gray-600 {
-  --tw-text-opacity: 1;
-  color: rgb(75 85 99 / var(--tw-text-opacity));
 }
 
 .text-gray-700 {
@@ -1165,20 +1168,8 @@ select {
 }
 
 @media (width >= 640px) {
-  .sm\:col-span-2 {
-    grid-column: span 2 / span 2;
-  }
-
-  .sm\:col-span-3 {
-    grid-column: span 3 / span 3;
-  }
-
   .sm\:col-span-4 {
     grid-column: span 4 / span 4;
-  }
-
-  .sm\:col-start-1 {
-    grid-column-start: 1;
   }
 
   .sm\:max-w-md {
@@ -1197,8 +1188,8 @@ select {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .sm\:grid-cols-6 {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+  .sm\:grid-cols-8 {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
   }
 
   .sm\:text-sm {
