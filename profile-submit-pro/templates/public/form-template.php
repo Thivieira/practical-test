@@ -92,19 +92,19 @@
     </div>
 
     <div>
-      <label for="birthDate" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+      <label for="birthdate" class="block text-sm font-medium text-gray-700">Date of Birth</label>
       <input
-        id="birthDate"
+        id="birthdate"
         type="text"
-        x-model="formData.birthDate"
+        x-model="formData.birthdate"
         autocomplete="bday"
-        :placeholder="translations.placeholders.birthDate + ' - ' + translations.placeholders.dateFormat"
-        @input="formatAndValidateBirthdate"
+        :placeholder="translations.placeholders.birthdate + ' - ' + translations.placeholders.dateFormat"
+        @input="formatAndValidatebirthdate"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       <span
-        x-show="errors.birthDate"
+        x-show="errors.birthdate"
         class="error text-red-500 text-sm"
-        x-text="errors.birthDate"></span>
+        x-text="errors.birthdate"></span>
     </div>
 
     <div class="space-y-4">
@@ -133,9 +133,9 @@
           <input
             id="apt"
             type="text"
-            x-model="formData.address.unit"
+            x-model="formData.address.street_number"
             autocomplete="address-line2"
-            :placeholder="translations.placeholders.unit"
+            :placeholder="translations.placeholders.street_number"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
         </div>
       </div>
@@ -176,20 +176,20 @@
         </div>
 
         <div>
-          <label for="zipCode" class="block text-sm font-medium text-gray-700">ZIP/Postal Code</label>
+          <label for="postal_code" class="block text-sm font-medium text-gray-700">ZIP/Postal Code</label>
           <input
-            id="zipCode"
+            id="postal_code"
             type="text"
 
-            x-model="formData.address.zipCode"
+            x-model="formData.address.postal_code"
             @input="validateAddress"
             autocomplete="postal-code"
-            :placeholder="translations.placeholders.zipCode"
+            :placeholder="translations.placeholders.postal_code"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
           <span
-            x-show="errors.address?.zipCode"
+            x-show="errors.address?.postal_code"
             class="error text-red-500 text-sm"
-            x-text="errors.address?.zipCode"></span>
+            x-text="errors.address?.postal_code"></span>
         </div>
       </div>
 

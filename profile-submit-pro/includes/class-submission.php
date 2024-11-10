@@ -17,7 +17,7 @@ class Submission {
 		$this->post_data  = json_decode( $post_data, true );
 		$this->repository = new SubmissionRepository();
 		$this->notifier   = new EmailNotifier();
-		$this->validator  = new SubmissionValidator();
+		$this->validator  = new SubmissionValidator( $this->repository );
 		$this->define_hooks();
 	}
 
@@ -36,6 +36,35 @@ class Submission {
 				);
 			}
 		);
+		add_action(
+			'rest_api_init',
+			function () {
+				register_rest_route(
+					'profile-submit-pro/v1',
+					'/verify_email_exists',
+					array(
+						'methods'             => 'POST',
+						'callback'            => array( $this, 'verify_email_exists' ),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+		);
+		add_action(
+			'rest_api_init',
+			function () {
+				register_rest_route(
+					'profile-submit-pro/v1',
+					'/verify_username_exists',
+					array(
+						'methods'             => 'POST',
+						'callback'            => array( $this, 'verify_username_exists' ),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+		);
+
 		add_action( 'wp_ajax_verify_email_exists', array( $this, 'verify_email_exists' ) );
 		add_action( 'wp_ajax_nopriv_verify_email_exists', array( $this, 'verify_email_exists' ) );
 		add_action( 'wp_ajax_verify_username_exists', array( $this, 'verify_username_exists' ) );
@@ -44,30 +73,39 @@ class Submission {
 		add_action( 'wp_ajax_nopriv_get_profile', array( $this, 'get_profile' ) );
 	}
 
-	public function handle_api_submission( WP_REST_Request $request ) {
+	public function handle_api_submission( \WP_REST_Request $request ) {
 		$post_data = $request->get_json_params();
 
 		if ( ! $this->validator->validate( $post_data ) ) {
-			return new WP_REST_Response( 'Invalid data', 400 );
+			return wp_send_json_error( array( 'message' => 'Invalid data' ), 400 );
 		}
 
 		$this->post_data = $post_data;
 
-		if ( $this->save() ) {
-			return new WP_REST_Response( 'Submission successful', 200 );
+		$is_update = isset( $post_data['update'] ) && $post_data['update'] === true;
+
+		$response = null;
+
+		if ( $is_update ) {
+			$response = $this->update( $post_data['id'] );
 		} else {
-			return new WP_REST_Response( 'Submission failed', 400 );
+			$response = $this->save();
+		}
+
+		if ( $response ) {
+			return wp_send_json_success( array( 'message' => 'Submission successful' ) );
+		} else {
+			return wp_send_json_error( array( 'message' => 'Submission failed' ), 400 );
 		}
 	}
 
 	public function verify_email_exists() {
-		// Check if the email is provided
-		if ( ! isset( $_POST['email'] ) ) {
+		$email = sanitize_email( $_POST['email'] );
+
+		if ( ! empty( $email ) ) {
 			wp_send_json_error( array( 'message' => 'Email is required' ) );
 			wp_die();
 		}
-
-		$email = sanitize_email( $_POST['email'] );
 
 		$id = $_POST['id'];
 		if ( ! empty( $id ) ) {
@@ -107,13 +145,12 @@ class Submission {
 	}
 
 	public function verify_username_exists() {
-		// Check if the username is provided
-		if ( ! isset( $_POST['username'] ) ) {
+		$username = sanitize_user( $_POST['username'] );
+
+		if ( ! empty( $username ) ) {
 			wp_send_json_error( array( 'message' => 'Username is required' ) );
 			wp_die();
 		}
-
-		$username = sanitize_user( $_POST['username'] );
 
 		$id = $_POST['id'];
 		if ( ! empty( $id ) ) {
@@ -190,7 +227,7 @@ class Submission {
 		return wp_send_json_success( $profile, 200 );
 	}
 
-	private function prepare_data() {
+	private function format_data( $is_new_submission = true ) {
 		if ( empty( $this->post_data ) ) {
 			error_log( 'No data received' );
 			return false;
@@ -200,65 +237,52 @@ class Submission {
 		$email      = sanitize_email( $this->post_data['email'] );
 		$username   = sanitize_user( $this->post_data['username'] );
 		$phone      = sanitize_text_field( $this->post_data['phone'] );
-		$birth_date = \DateTime::createFromFormat( 'm/d/Y', $this->post_data['birthDate'] )->format( 'Y-m-d' );
+		$birth_date = sanitize_text_field( $this->post_data['birthdate'] );
 
-		$street   = sanitize_text_field( $this->post_data['address']['street'] );
-		$unit     = sanitize_text_field( $this->post_data['address']['unit'] );
-		$city     = sanitize_text_field( $this->post_data['address']['city'] );
-		$state    = sanitize_text_field( $this->post_data['address']['state'] );
-		$zip_code = sanitize_text_field( $this->post_data['address']['zipCode'] );
-		$country  = sanitize_text_field( $this->post_data['address']['country'] );
+		$street        = sanitize_text_field( $this->post_data['address']['street'] );
+		$street_number = sanitize_text_field( $this->post_data['address']['street_number'] );
+		$city          = sanitize_text_field( $this->post_data['address']['city'] );
+		$state         = sanitize_text_field( $this->post_data['address']['state'] );
+		$postal_code   = sanitize_text_field( $this->post_data['address']['postal_code'] );
+		$country       = sanitize_text_field( $this->post_data['address']['country'] );
 
 		$interests = json_encode( $this->post_data['interests'] );
 		$cv        = $this->post_data['cv'];
 
-		$public_key = $this->repository->generate_public_key();
-
-		$table_name = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
-
 		$input_data = array(
-			'name'         => $name,
-			'email'        => $email,
-			'username'     => $username,
-			'phone'        => $phone,
-			'birth_date'   => $birth_date,
-			'street'       => $street,
-			'unit'         => $unit,
-			'city'         => $city,
-			'state'        => $state,
-			'zip_code'     => $zip_code,
-			'country'      => $country,
-			'interests'    => $interests,
-			'cv'           => $cv,
-			'public_key'   => $public_key,
-			'submitted_at' => date( 'Y-m-d H:i:s' ),
+			'name'          => $name,
+			'email'         => $email,
+			'username'      => $username,
+			'phone'         => $phone,
+			'birthdate'     => $birth_date,
+			'street'        => $street,
+			'street_number' => $street_number,
+			'city'          => $city,
+			'state'         => $state,
+			'postal_code'   => $postal_code,
+			'country'       => $country,
+			'interests'     => $interests,
+			'cv'            => $cv,
 		);
 
-		$prepared_data = $this->wpdb->prepare(
-			"INSERT INTO {$table_name} (name, email, username, phone, birthdate, street, street_number, city, state, postal_code, country, interests, cv, public_key, submitted_at)
-			VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-			array_values( $input_data )
-		);
+		if ( $is_new_submission ) {
+			$public_key                 = $this->repository->generate_public_key();
+			$input_data['public_key']   = $public_key;
+			$input_data['submitted_at'] = date( 'Y-m-d H:i:s' );
+		}
 
-		error_log( 'Prepared data: ' . $prepared_data );
-		error_log( 'Input data: ' . json_encode( $input_data ) );
-
-		return array( $prepared_data, $input_data );
+		return $input_data;
 	}
 
 	public function save() {
-		$data          = $this->prepare_data();
-		$prepared_data = $data[0];
-		$input_data    = $data[1];
+		$data = $this->format_data();
 
-		$this->repository->save( $prepared_data, $input_data );
+		return $this->repository->save( $data );
 	}
 
 	public function update( $id ) {
-		$data          = $this->prepare_data();
-		$prepared_data = $data[0];
-		$input_data    = $data[1];
+		$data = $this->format_data( false );
 
-		$this->repository->update( $prepared_data, $input_data, $id );
+		return $this->repository->update( $data, $id );
 	}
 }

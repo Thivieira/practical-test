@@ -14,13 +14,13 @@ class SubmissionRepository {
 		$this->table_name     = $wpdb->prefix . Settings::SUBMISSIONS_TABLE;
 	}
 
-	public function save( $prepared_data, $input_data ) {
-		if ( ! $prepared_data ) {
+	public function save( $input_data ) {
+		if ( ! $input_data ) {
 			error_log( 'Failed to prepare data for submission.' );
 			return false;
 		}
 
-		$inserted_id = $this->insert_submission( $prepared_data );
+		$inserted_id = $this->insert_submission( $input_data );
 
 		if ( ! $inserted_id ) {
 			error_log( 'Failed to insert submission into the database.' );
@@ -33,13 +33,13 @@ class SubmissionRepository {
 		return true;
 	}
 
-	public function update( $prepared_data, $input_data ) {
-		if ( ! $prepared_data ) {
+	public function update( $input_data, $id ) {
+		if ( ! $input_data ) {
 			error_log( 'Failed to prepare data for submission.' );
 			return false;
 		}
 
-		$result = $this->update_submission( $prepared_data );
+		$result = $this->update_submission( $input_data, $id );
 
 		if ( ! $result ) {
 			error_log( 'Failed to update submission into the database.' );
@@ -49,8 +49,8 @@ class SubmissionRepository {
 		return true;
 	}
 
-	private function insert_submission( $prepared_data ) {
-		$result = $this->wpdb->query( $prepared_data );
+	private function insert_submission( $input_data ) {
+		$result = $this->wpdb->insert( $this->table_name, $input_data );
 
 		if ( $result === false ) {
 			error_log( 'Database insert error: ' . $this->wpdb->last_error );
@@ -60,9 +60,9 @@ class SubmissionRepository {
 		return $this->wpdb->insert_id;
 	}
 
-	private function update_submission( $prepared_data ) {
+	private function update_submission( $input_data, $id ) {
 		try {
-			$this->wpdb->update( $this->table_name, $prepared_data, array( 'id' => $input_data['id'] ) );
+			$this->wpdb->update( $this->table_name, $input_data, array( 'id' => $id ) );
 			return true;
 		} catch ( \Exception $e ) {
 			error_log( 'Database update error: ' . $e->getMessage() );

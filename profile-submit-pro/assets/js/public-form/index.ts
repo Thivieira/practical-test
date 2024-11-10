@@ -1,6 +1,6 @@
 import Swal from 'sweetalert2';
 import intlTelInput from 'intl-tel-input';
-import { isErrorObjectEmpty } from '../utils';
+import { getCountries, isErrorObjectEmpty, loadIntlTelInput } from '../utils';
 
 export function formHandler() {
   return {
@@ -10,13 +10,13 @@ export function formHandler() {
       username: '',
       password: '',
       phone: '',
-      birthDate: '',
+      birthdate: '',
       address: {
         street: '',
-        unit: '',
+        street_number: '',
         city: '',
         state: '',
-        zipCode: '',
+        postal_code: '',
         country: '',
       },
       interests: [],
@@ -29,40 +29,19 @@ export function formHandler() {
     config: window.formConfig,
     loading: false,
 
-    init() {
-      const input = document.querySelector('#phone');
-      if (input) {
-        intlTelInput(input, {
-          initialCountry: 'auto',
-          containerClass: 'iti w-full',
-          geoIpLookup: (callback) => {
-            fetch('https://ipapi.co/json')
-              .then((res) => res.json())
-              .then((data) => {
-                callback(data.country_code);
-                this.formData.address.country = data.country;
-              })
-              .catch(() => {
-                callback('us');
-                this.formData.address.country = 'US';
-              });
-          },
-          loadUtilsOnInit: () => import('intl-tel-input/build/js/utils.js'),
-        });
-      }
-      fetch('/wp-content/plugins/profile-submit-pro/assets/countries.json', {
-        headers: {
-          'Content-Type': 'application/json',
+    async init() {
+      await loadIntlTelInput(
+        (country_code) => {
+          this.formData.address.country = country_code;
         },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          this.countries = data;
-        })
-        .catch((error) => {
-          console.error('Error loading countries:', error);
-          this.countries = [];
-        });
+        () => {
+          this.formData.address.country = 'US';
+        },
+      );
+      await this.fetchCountries();
+    },
+    async fetchCountries() {
+      this.countries = await getCountries();
     },
     validateName() {
       this.errors.name =
@@ -165,18 +144,18 @@ export function formHandler() {
       this.errors.address.street = this.formData.address.street
         ? ''
         : this.translations.errors.address.street;
-      this.errors.address.unit = this.formData.address.unit
+      this.errors.address.street_number = this.formData.address.street_number
         ? ''
-        : this.translations.errors.address.unit;
+        : this.translations.errors.address.street_number;
       this.errors.address.city = this.formData.address.city
         ? ''
         : this.translations.errors.address.city;
       this.errors.address.state = this.formData.address.state
         ? ''
         : this.translations.errors.address.state;
-      this.errors.address.zipCode = this.formData.address.zipCode
+      this.errors.address.postal_code = this.formData.address.postal_code
         ? ''
-        : this.translations.errors.address.zipCode;
+        : this.translations.errors.address.postal_code;
       this.errors.address.country = this.formData.address.country
         ? ''
         : this.translations.errors.address.country;
@@ -191,23 +170,23 @@ export function formHandler() {
       this.errors.cv =
         this.formData.cv.length < 20 ? this.translations.errors.cv : '';
     },
-    formatAndValidateBirthdate() {
-      this.formData.birthDate = this.formData.birthDate.replace(
+    formatAndValidatebirthdate() {
+      this.formData.birthdate = this.formData.birthdate.replace(
         /(\d{2})(\d{2})(\d{4})/,
         '$1/$2/$3',
       );
-      this.validateBirthdate();
+      this.validatebirthdate();
     },
-    validateBirthdate() {
-      if (!this.formData.birthDate) {
-        this.errors.birthDate = this.translations.errors.birthDate;
+    validatebirthdate() {
+      if (!this.formData.birthdate) {
+        this.errors.birthdate = this.translations.errors.birthdate;
         return;
       }
-      const parsedDate = new Date(this.formData.birthDate);
+      const parsedDate = new Date(this.formData.birthdate);
       if (isNaN(parsedDate.getTime())) {
-        this.errors.birthDate = this.translations.errors.birthDate;
+        this.errors.birthdate = this.translations.errors.birthdate;
       } else {
-        this.errors.birthDate = '';
+        this.errors.birthdate = '';
       }
     },
 
@@ -218,7 +197,7 @@ export function formHandler() {
       this.validateUsername();
       this.validatePassword();
       this.validatePhone();
-      this.validateBirthdate();
+      this.validatebirthdate();
       this.validateAddress();
       this.validateInterests();
       this.validateCv();
@@ -236,6 +215,12 @@ export function formHandler() {
         });
         return false;
       }
+
+      // format date
+      this.formData.birthdate = this.formData.birthdate.replace(
+        /(\d{2})(\d{2})(\d{4})/,
+        '$3-$2-$1',
+      );
 
       this.loading = true;
 

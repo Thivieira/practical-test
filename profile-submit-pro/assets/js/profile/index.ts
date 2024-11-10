@@ -1,8 +1,7 @@
 import Swal from 'sweetalert2';
-import intlTelInput from 'intl-tel-input';
-import { formatDate, isErrorObjectEmpty } from '../utils';
-import { Profile } from '../types';
-import { WordpressJsonResponse } from '../types';
+import { formatDate, getCountries, isErrorObjectEmpty, loadIntlTelInput } from '../utils';
+import { Profile, WordpressJsonResponse } from '../types';
+import dayjs from '../dayjs';
 
 export function profileFormHandler() {
   return {
@@ -12,13 +11,13 @@ export function profileFormHandler() {
       email: '',
       username: '',
       phone: '',
-      birthDate: '',
+      birthdate: '',
       address: {
         street: '',
-        unit: '',
+        street_number: '',
         city: '',
         state: '',
-        zipCode: '',
+        postal_code: '',
         country: '',
       },
       interests: [],
@@ -32,39 +31,21 @@ export function profileFormHandler() {
     loading: false,
 
     async init() {
-      const input = document.querySelector('#phone');
-      if (input) {
-        intlTelInput(input, {
-          initialCountry: 'auto',
-          containerClass: 'iti w-full',
-          geoIpLookup: (callback) => {
-            fetch('https://ipapi.co/json')
-              .then((res) => res.json())
-              .then((data) => {
-                callback(data.country_code);
-                this.formData.address.country = data.country;
-              })
-              .catch(() => {
-                callback('us');
-                this.formData.address.country = 'US';
-              });
-          },
-          loadUtilsOnInit: () => import('intl-tel-input/build/js/utils.js'),
-        });
-      }
-      fetch('/wp-content/plugins/profile-submit-pro/assets/countries.json', {
-        headers: {
-          'Content-Type': 'application/json',
+      await loadIntlTelInput(
+        (country_code) => {
+          this.formData.address.country = country_code;
         },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          this.countries = data;
-        })
-        .catch((error) => {
-          console.error('Error loading countries:', error);
-          this.countries = [];
-        });
+        () => {
+          this.formData.address.country = 'US';
+        },
+      );
+      await this.fetchCountries();
+      await this.fetchProfileData();
+    },
+    async fetchCountries() {
+      this.countries = await getCountries();
+    },
+    async fetchProfileData() {
       const searchParams = new URLSearchParams(window.location.search);
       const profileResponse = await fetch(this.config.ajax_url, {
         method: 'POST',
@@ -85,13 +66,13 @@ export function profileFormHandler() {
         email: profileData.email,
         username: profileData.username,
         phone: profileData.phone,
-        birthDate: formatDate(profileData.birthdate),
+        birthdate: formatDate(profileData.birthdate),
         address: {
           street: profileData.street,
-          unit: profileData.street_number,
+          street_number: profileData.street_number,
           city: profileData.city,
           state: profileData.state,
-          zipCode: profileData.postal_code,
+          postal_code: profileData.postal_code,
           country: profileData.country,
         },
         interests: interests,
@@ -193,24 +174,23 @@ export function profileFormHandler() {
         ? this.translations.errors.phone
         : '';
     },
-
     validateAddress() {
       this.errors.address = {};
       this.errors.address.street = this.formData.address.street
         ? ''
         : this.translations.errors.address.street;
-      this.errors.address.unit = this.formData.address.unit
+      this.errors.address.street_number = this.formData.address.street_number
         ? ''
-        : this.translations.errors.address.unit;
+        : this.translations.errors.address.street_number;
       this.errors.address.city = this.formData.address.city
         ? ''
         : this.translations.errors.address.city;
       this.errors.address.state = this.formData.address.state
         ? ''
         : this.translations.errors.address.state;
-      this.errors.address.zipCode = this.formData.address.zipCode
+      this.errors.address.postal_code = this.formData.address.postal_code
         ? ''
-        : this.translations.errors.address.zipCode;
+        : this.translations.errors.address.postal_code;
       this.errors.address.country = this.formData.address.country
         ? ''
         : this.translations.errors.address.country;
@@ -225,23 +205,23 @@ export function profileFormHandler() {
       this.errors.cv =
         this.formData.cv.length < 20 ? this.translations.errors.cv : '';
     },
-    formatAndValidateBirthdate() {
-      this.formData.birthDate = formatDate(
-        this.formData.birthDate,
+    formatAndValidatebirthdate() {
+      this.formData.birthdate = formatDate(
+        this.formData.birthdate,
         this.dateFormat,
       );
-      this.validateBirthdate();
+      this.validatebirthdate();
     },
-    validateBirthdate() {
-      if (!this.formData.birthDate) {
-        this.errors.birthDate = this.translations.errors.birthDate;
+    validatebirthdate() {
+      if (!this.formData.birthdate) {
+        this.errors.birthdate = this.translations.errors.birthdate;
         return;
       }
-      const parsedDate = new Date(this.formData.birthDate);
+      const parsedDate = new Date(this.formData.birthdate);
       if (isNaN(parsedDate.getTime())) {
-        this.errors.birthDate = this.translations.errors.birthDate;
+        this.errors.birthdate = this.translations.errors.birthdate;
       } else {
-        this.errors.birthDate = '';
+        this.errors.birthdate = '';
       }
     },
     validateIfFormIsChanged() {
@@ -250,8 +230,8 @@ export function profileFormHandler() {
         JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile),
       );
       console.log({
-        unit: this.formData.address.unit,
-        originalUnit: this.originalProfile.address.unit,
+        street_number: this.formData.address.street_number,
+        originalstreet_number: this.originalProfile.address.street_number,
       });
       return (
         JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile)
@@ -266,7 +246,7 @@ export function profileFormHandler() {
       this.validateEmail();
       this.validateUsername();
       this.validatePhone();
-      this.validateBirthdate();
+      this.validatebirthdate();
       this.validateAddress();
       this.validateInterests();
       this.validateCv();
@@ -284,6 +264,9 @@ export function profileFormHandler() {
         });
         return false;
       }
+
+      // format date
+      this.formData.birthdate = dayjs(this.formData.birthdate).format('YYYY-MM-DD');
 
       this.loading = true;
 
@@ -306,12 +289,15 @@ export function profileFormHandler() {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const responseData = await response.json();
-
         Swal.fire({
           icon: 'success',
           title: 'Success!',
           text: this.translations.errors.formSuccess,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didClose: async () => {
+            await this.fetchProfileData();
+          },
         });
       } catch (error) {
         console.error('There was a problem with your fetch operation:', error);

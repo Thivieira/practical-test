@@ -23,3 +23,8 @@ export type Profile = {
   submitted_at: string;
   public_key: string;
 };
+
+export type Country = {
+  name: string;
+  code: string;
+};

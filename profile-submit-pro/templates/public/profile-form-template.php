@@ -52,24 +52,24 @@
 			<label
 				for="birthdate"
 				class="block text-sm/6 font-medium text-gray-900"
-				>Birthdate</label
+				>Birth date</label
 			>
 			<div class="mt-2">
 				<input
 				type="text"
 				name="birthdate"
 				id="birthdate"
-				x-model="formData.birthDate"
+				x-model="formData.birthdate"
 				autocomplete="bday"
-				:placeholder="translations.placeholders.birthDate + ' - ' + translations.placeholders.dateFormat"
-				@input="formatAndValidateBirthdate"
+				:placeholder="translations.placeholders.birthdate + ' - ' + translations.placeholders.dateFormat"
+				@input="formatAndValidatebirthdate"
 				class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
 				/>
 			</div>
 			<span
-				x-show="errors.birthDate"
+				x-show="errors.birthdate"
 				class="error text-red-500 text-sm"
-				x-text="errors.birthDate"
+				x-text="errors.birthdate"
 			></span>
 			</div>
 
@@ -159,14 +159,14 @@
 					name="street-number"
 					id="street-number"
 					autocomplete="street-number"
-					x-model="formData.address.unit"
+					x-model="formData.address.street_number"
 					class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
 					/>
 				</div>
 				<span
-					x-show="errors.address?.unit"
+					x-show="errors.address?.street_number"
 					class="error text-red-500 text-sm"
-					x-text="errors.address?.unit"
+					x-text="errors.address?.street_number"
 				></span>
 				</div>
 			</div>
@@ -229,14 +229,14 @@
 					name="postal-code"
 					id="postal-code"
 					autocomplete="postal-code"
-					x-model="formData.address.zipCode"
+					x-model="formData.address.postal_code"
 					class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm/6"
 				/>
 				</div>
 				<span
-				x-show="errors.address?.zipCode"
+				x-show="errors.address?.postal_code"
 				class="error text-red-500 text-sm"
-				x-text="errors.address?.zipCode"
+				x-text="errors.address?.postal_code"
 				></span>
 			</div>
 			<div class="col-span-full">
