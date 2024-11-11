@@ -13,8 +13,6 @@ This WordPress plugin implements a user submission form with multiple fields, su
 7. [Development Environment](#development-environment)
 8. [CSV Submission Script](#csv-submission-script)
 9. [WordPress Best Practices](#wordpress-best-practices)
-10. [Contributing](#contributing)
-11. [License](#license)
 
 ---
 
