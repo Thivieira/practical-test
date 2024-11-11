@@ -10,9 +10,8 @@ This WordPress plugin implements a user submission form with multiple fields, su
 4. [Usage](#usage)
 5. [API Integration](#api-integration)
 6. [Submission Limits](#submission-limits)
-7. [Development Environment](#development-environment)
-8. [CSV Submission Script](#csv-submission-script)
-9. [WordPress Best Practices](#wordpress-best-practices)
+7. [CSV Submission Script](#csv-submission-script)
+8. [WordPress Best Practices](#wordpress-best-practices)
 
 ---
 
@@ -229,7 +228,7 @@ John Doe,john@example.com,johndoe,password123,123-456-7890,1990-01-01,Main St,12
 
 ---
 
-### 9. WordPress Best Practices
+### 8. WordPress Best Practices
 
 This plugin adheres to WordPress best practices by:
 
