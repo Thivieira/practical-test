@@ -20,13 +20,13 @@ This WordPress plugin implements a user submission form with multiple fields, su
 
 ### 1. Introduction
 
-This plugin was created for the Kobkob LLC practical test. It provides a submission form for users to submit their personal information, including name, email, and other profile details. The form can be embedded on any page or post using a shortcode, and the submitted data is stored in the database. Additionally, the plugin includes a settings page for defining daily submission limits and provides an external web service for accepting data in JSON format.
+This plugin was created for the Kobkob LLC practical test. It provides a submission form for users to submit their personal information, including name, email, and other profile details. The form can be embedded on any page or post using a shortcode, and the submitted data is stored in the database. Additionally, the plugin includes a settings page for defining daily submission limits and provides an external web service for accepting data in JSON format. Furthermore, the plugin offers a Python command-line interface (CLI) tool to facilitate bulk data submission from CSV files.
 
 ---
 
 ### 2. Features
 
-- **Custom Submission Form:** Collects name, email, username, password, phone number, birthday, address, and interests.
+- **Custom Submission Form:** Collects name, email, username, password, phone number, birthdate, address, cv, and interests.
 - **User Profiles:** Allows users to edit their submitted profiles when logged in.
 - **Email Confirmation:** Users receive an email with a profile link upon successful submission.
 - **Submission Limits:** Define daily submission limits via the WordPress admin settings page.
@@ -46,30 +46,32 @@ A Docker environment has been set up to simplify installation and ensure there a
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/yourusername/yourplugin.git
+   git clone https://github.com/Thivieira/practical-test
    ```
 
 2. Navigate to the project folder:
 
    ```bash
-   cd yourplugin
+   cd practical-test
    ```
 
-3. Build and start the Docker containers:
+3. Create the `.env` file for the project by referencing the constants defined in the `.env.example` file.
+
+4. Build and start the Docker containers:
 
    ```bash
    docker-compose up -d
    ```
 
-4. Access your WordPress instance at `http://localhost` and log in to the WordPress admin.
+5. Access your WordPress instance at `http://localhost:8000` and log in to the WordPress admin.
 
-5. Upload and activate the plugin through the WordPress dashboard.
+6. Activate the plugin through the WordPress dashboard.
 
 #### 3.2 Manual Installation (Without Docker)
 
 Alternatively, you can manually install the plugin:
 
-1. Download the plugin code and place it in the `wp-content/plugins/` directory.
+1. Download the plugin code, located in the `profile-submit-pro` folder, compress it into a zip file, and place it in the `wp-content/plugins/` directory.
 2. Log in to your WordPress admin panel.
 3. Navigate to **Plugins > Add New** and activate the plugin.
 
@@ -82,26 +84,49 @@ Alternatively, you can manually install the plugin:
 You can embed the submission form on any page or post using the following shortcode:
 
 ```php
-[submission_form]
+[profile_submit_pro]
 ```
 
 This will render the form on the front end, allowing users to submit their details.
 
-#### 4.2 Admin Settings
+#### 4.2 Shortcode for the profile form (optional)
 
-The plugin includes a settings page under **Settings > Submission Form Settings**. Here, you can:
+You can embed the profile form on any page or post using the following shortcode:
 
-- Set daily submission limits.
-- Configure email confirmation templates.
+```php
+[profile_submit_pro page="profile"]
+```
+
+This will render the profile form on the front end, allowing users to edit their details.
+
+If this shortcode is not manually placed by the WordPress admin user, the plugin will automatically create it on a page titled `profile`.
+
+#### 4.3 Admin Settings
+
+The plugin features a dedicated settings page accessible via **Settings > Profile Submit Pro > Settings**. Within this section, users have the ability to:
+
+- Establish daily submission limits.
+- Configure the email address used for confirmation notifications.
+- Specify the subject line for email confirmation messages.
+- Define the date format utilized throughout the plugin.
+
+#### 4.4 Submissions Table
+
+The plugin features a paginated interface for viewing current submissions, accessible under **Settings > Profile Submit Pro > Submissions**. Within this section, users can:
+
+- Review submitted entries.
+- Remove submissions as necessary.
 
 ---
 
 ### 5. API Integration
 
-The plugin exposes an API endpoint that accepts JSON-formatted data from external sources. To submit data via the API, send a `POST` request to the following endpoint:
+#### 5.1 Endpoint to Submit
+
+The plugin provides a dedicated API endpoint designed to accept JSON-formatted data from external sources. To submit data via this API, you must send a `POST` request to the specified endpoint. This functionality enables seamless integration with external applications and services.
 
 ```bash
-POST http://yourwordpresssite.com/wp-json/submission/v1/submit
+POST http://yourwordpresssite.com/wp-json/profile-submit-pro/v1/submit
 ```
 
 Sample JSON payload:
@@ -113,14 +138,49 @@ Sample JSON payload:
   "username": "johndoe",
   "password": "password123",
   "phone": "123-456-7890",
-  "birthday": "1990-01-01",
+  "birthdate": "1990-01-01",
   "address": {
-    "street": "123 Main St",
+    "street": "Main St",
+    "street_number": "123",
     "city": "New York",
+    "state": "NY",
+    "postal_code": "90210",
     "country": "USA"
   },
   "interests": ["music", "books"],
   "cv": "Short CV here..."
+}
+```
+
+#### 5.1 Endpoint for Email Existence Verification
+
+The "5.1 Endpoint for Email Existence Verification" section details an API endpoint that allows users to check if an email address is already registered, ensuring unique user registrations and preventing duplicates.
+
+```bash
+POST http://yourwordpresssite.com/wp-json/profile-submit-pro/v1/verify_email_exists
+```
+
+Sample JSON payload:
+
+```json
+{
+  "email": "john@example.com"
+}
+```
+
+#### 5.2 Endpoint to Verify Username Existence
+
+This endpoint allows users to check if a specified username is already registered in the system. By sending a `POST` request with the username, the API ensures unique registrations and prevents duplicates. This functionality enhances user experience by providing immediate feedback during the registration process.
+
+```bash
+POST http://yourwordpresssite.com/wp-json/profile-submit-pro/v1/verify_username_exists
+```
+
+Sample JSON payload:
+
+```json
+{
+  "username": "johndoe"
 }
 ```
 
@@ -132,24 +192,7 @@ You can define a daily submission limit through the WordPress admin interface. O
 
 ---
 
-### 7. Development Environment
-
-This project includes a Docker setup to standardize the environment and reduce issues caused by different server configurations. To get started, run the following:
-
-```bash
-docker-compose up -d
-```
-
-The environment consists of:
-
-- A WordPress instance running on Apache.
-- MySQL database for data storage.
-
-You can access the local WordPress site at `http://localhost:8000`.
-
----
-
-### 8. CSV Submission Script
+### 7. CSV Submission Script
 
 A Python script is included in the repository that allows you to submit data to the form from a CSV file. The script reads each line of the CSV and sends a POST request to the form's API endpoint.
 
@@ -159,19 +202,31 @@ To use the script:
 2. Install required dependencies:
 
    ```bash
-   pip install requests
+   pip install -r requirements.txt
+   ```
+
+   2.1 Recommended Usage of Virtual Environments (Optional)
+
+   It is recommended to use virtual environments to manage dependencies and avoid conflicts with other projects. Here’s how to set up a virtual environment:
+
+   ```bash
+   # For Windows
+   python -m venv myenv
+
+   # For macOS/Linux
+   python3 -m venv myenv
    ```
 
 3. Run the script:
    ```bash
-   python submit_csv.py path/to/yourfile.csv
+   python main.py path/to/yourfile.csv
    ```
 
 Example CSV format:
 
 ```
-name,email,username,password,phone,birthday,street,city,country,interests,cv
-John Doe,john@example.com,johndoe,password123,123-456-7890,1990-01-01,123 Main St,New York,USA,"music,books","Short CV here..."
+name,email,username,password,phone,birthdate,street,street_number,city,state,postal_code,country,interests,cv
+John Doe,john@example.com,johndoe,password123,123-456-7890,1990-01-01,Main St,123,New York,90210,USA,"music,books,arts","Short CV here..."
 ```
 
 ---
