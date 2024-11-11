@@ -81,12 +81,9 @@ class Activator {
 		}
 
 		// Add default options
-		Settings::add_option( 'version', '1.0' );
-		Settings::add_option( 'clean_uninstall', Settings::DEFAULT_OPTIONS['clean_uninstall'] );
-		Settings::add_option( 'email_template', Settings::DEFAULT_OPTIONS['email_template'] );
-		Settings::add_option( 'notification_email', Settings::DEFAULT_OPTIONS['notification_email'] );
-		Settings::add_option( 'daily_submission_limit', Settings::DEFAULT_OPTIONS['daily_submission_limit'] );
-		Settings::add_option( 'notification_email_from', Settings::DEFAULT_OPTIONS['notification_email_from'] );
+		foreach ( Settings::DEFAULT_OPTIONS as $key => $value ) {
+			Settings::add_option( $key, $value );
+		}
 
 		self::create_profile_page();
 	}

@@ -16,19 +16,20 @@ class PublicController {
 		$this->version     = $version;
 		$this->loader      = new Loader();
 		$this->define_hooks();
+		$this->ensure_shortcode_options();
 	}
 
 	private function define_hooks() {
-		add_action( 'wp_ajax_' . Settings::PROFILE_FORM_SUBMIT_ACTION, array( $this, Settings::PROFILE_FORM_SUBMIT_ACTION ) );
-		add_action( 'wp_ajax_nopriv_' . Settings::PROFILE_FORM_SUBMIT_ACTION, array( $this, Settings::PROFILE_FORM_SUBMIT_ACTION ) );
-		add_action( 'wp_ajax_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, array( $this, Settings::PUBLIC_FORM_SUBMIT_ACTION ) );
-		add_action( 'wp_ajax_nopriv_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, array( $this, Settings::PUBLIC_FORM_SUBMIT_ACTION ) );
+		add_action( 'wp_ajax_' . Settings::PROFILE_FORM_SUBMIT_ACTION, array( $this, 'submit_profile_form_action' ) );
+		add_action( 'wp_ajax_nopriv_' . Settings::PROFILE_FORM_SUBMIT_ACTION, array( $this, 'submit_profile_form_action' ) );
+		add_action( 'wp_ajax_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, array( $this, 'submit_public_form_action' ) );
+		add_action( 'wp_ajax_nopriv_' . Settings::PUBLIC_FORM_SUBMIT_ACTION, array( $this, 'submit_public_form_action' ) );
 		add_shortcode( 'profile_submit_pro', array( $this, 'profile_submit_pro_shortcode' ) );
-		add_action( 'wp_footer', array( $this, 'check_profile_shortcode_removal' ) ); // Hook to check shortcode removal
+		add_action( 'wp_footer', array( $this, 'check_profile_shortcode_removal' ) );
 	}
 
 	public function profile_submit_pro_shortcode( $atts ) {
-		global $post; // Access the current post
+		global $post;
 
 		$atts = shortcode_atts(
 			array(
@@ -37,19 +38,15 @@ class PublicController {
 			$atts
 		);
 
-		// Get the current post URL
 		$post_url = get_permalink( $post->ID );
 
-		// Retrieve the stored URL and post ID from options
 		$stored_post_id = get_option( 'profile_submit_pro_shortcode_post_id' );
 		$stored_url     = get_option( 'profile_submit_pro_shortcode_url' );
 
-		// Check if the shortcode is already used on another page with 'page' attribute set to 'profile'
 		if ( $atts['page'] === 'profile' && $stored_post_id && $stored_post_id != $post->ID ) {
 			return 'This shortcode is already used on another page. Please remove it from there first.';
 		}
 
-		// Save the URL and post ID if it's the first time the shortcode with 'page="profile"' is used
 		if ( $atts['page'] === 'profile' && ! $stored_post_id ) {
 			update_option( 'profile_submit_pro_shortcode_post_id', $post->ID );
 			update_option( 'profile_submit_pro_shortcode_url', $post_url );
@@ -72,8 +69,7 @@ class PublicController {
 			wp_die();
 		}
 
-		$id = $_POST['id'];
-
+		$id        = $_POST['id'];
 		$post_data = $_POST['post_data'];
 
 		if ( empty( $post_data ) ) {
@@ -101,7 +97,6 @@ class PublicController {
 			wp_die();
 		}
 
-		// daily submission limit reached
 		if ( $this->daily_submission_limit_reached() ) {
 			wp_send_json_error( array( 'message' => 'Daily submission limit reached' ) );
 			wp_die();
@@ -112,17 +107,6 @@ class PublicController {
 
 		wp_send_json_success( array( 'message' => 'Profile submitted successfully.' ) );
 		wp_die();
-	}
-
-	private function daily_submission_limit_reached() {
-		$daily_limit       = Settings::get_option( 'daily_submission_limit' );
-		$today_submissions = $this->get_today_submissions_count();
-		return $today_submissions >= $daily_limit;
-	}
-
-	private function get_today_submissions_count() {
-		$table_name = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
-		return $this->wpdb->get_var( $this->wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE DATE(submitted_at) = CURDATE()", $table_name ) );
 	}
 
 	public function enqueue_public_form_translations() {
@@ -260,19 +244,40 @@ class PublicController {
 		}
 	}
 
-	// Function to check if the shortcode has been removed
+	private function daily_submission_limit_reached() {
+		$daily_limit       = Settings::get_option( 'daily_submission_limit' );
+		$today_submissions = $this->get_today_submissions_count();
+		return $today_submissions >= $daily_limit;
+	}
+
+	private function get_today_submissions_count() {
+		$table_name = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
+		return $this->wpdb->get_var( $this->wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE DATE(submitted_at) = CURDATE()", $table_name ) );
+	}
+
 	public function check_profile_shortcode_removal() {
 		global $post;
 
 		$stored_post_id = get_option( 'profile_submit_pro_shortcode_post_id' );
 
-		// Check if the shortcode has been removed from the current post
 		if ( $stored_post_id == $post->ID ) {
 			if ( ! has_shortcode( $post->post_content, 'profile_submit_pro' ) ) {
-				// Remove the stored post ID and URL if the shortcode is gone
 				delete_option( 'profile_submit_pro_shortcode_post_id' );
 				delete_option( 'profile_submit_pro_shortcode_url' );
 			}
+		}
+	}
+
+	private function ensure_shortcode_options() {
+		$stored_post_id = get_option( 'profile_submit_pro_shortcode_post_id' );
+		$stored_url     = get_option( 'profile_submit_pro_shortcode_url' );
+
+		if ( empty( $stored_post_id ) || empty( $stored_url ) ) {
+			$default_post_id = get_the_ID();
+			$default_url     = get_permalink( $default_post_id );
+
+			update_option( 'profile_submit_pro_shortcode_post_id', $default_post_id );
+			update_option( 'profile_submit_pro_shortcode_url', $default_url );
 		}
 	}
 }

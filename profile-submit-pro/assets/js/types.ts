@@ -29,6 +29,7 @@ export type Country = {
   code: string;
 };
 
+export type DefaultOptions = GeneralSettings & SubmissionsSettings;
 
 export type GeneralSettings = {
   clean_uninstall: boolean;
@@ -39,5 +40,6 @@ export type SubmissionsSettings = {
   email_template: string;
   notification_email: boolean;
   notification_email_from: string;
+  notification_email_subject: string;
   date_format: string;
 };

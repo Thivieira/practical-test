@@ -29,7 +29,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach ( $submissions as $submission ) : ?>
+					<?php foreach ( $data['submissions'] as $submission ) : ?>
 						<?php
 						$stored_url   = get_option( 'profile_submit_pro_shortcode_url' );
 						$profile_link = $stored_url . '?key=' . $submission->public_key;
@@ -57,7 +57,7 @@
 					</tr>
 					<?php endforeach; ?>
 
-					<?php if ( empty( $submissions ) ) : ?>
+					<?php if ( empty( $data['submissions'] ) ) : ?>
 					<tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
 						<td colspan="6" scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white text-center"><?php esc_html_e( 'No submissions found', 'profile-submit-pro' ); ?></td>
 					</tr>
@@ -65,6 +65,7 @@
 				</tbody>
 			</table>
 			<?php
+			$pagination   = $data['pagination'];
 			$current_page = $pagination['current_page'];
 			$total_pages  = $pagination['total_pages'];
 			$from         = $current_page * $limit - $limit + 1;

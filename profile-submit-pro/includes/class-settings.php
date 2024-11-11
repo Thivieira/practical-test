@@ -45,27 +45,35 @@ class Settings {
 	);
 
 	const DEFAULT_OPTIONS = array(
-		'daily_submission_limit'     => 50,
+		'version'                    => '1.0',
+		'clean_uninstall'            => 0,
 		'email_template'             => 'default',
 		'notification_email'         => 1,
+		'daily_submission_limit'     => 50,
 		'notification_email_from'    => '',
 		'notification_email_subject' => 'Form submission',
-		'clean_uninstall'            => 0,
+		'date_format'                => 'mm/dd/yyyy',
 	);
 
 	const DEFAULT_PREFIX = 'profile_submit_pro_';
 
 	const SUBMISSIONS_TABLE = self::DEFAULT_PREFIX . 'submissions';
 
-	const PROFILE_FORM_SUBMIT_ACTION  = 'submit_profile_form_action';
-	const PUBLIC_FORM_SUBMIT_ACTION   = 'submit_public_form_action';
-	const DELETE_SUBMISSION_ACTION    = 'delete_submission';
-	const SUBMISSIONS_SETTINGS_ACTION = 'submissions_settings';
-	const GENERAL_SETTINGS_ACTION     = 'general_settings';
+	const PROFILE_FORM_SUBMIT_ACTION    = 'submit_profile_form_action';
+	const PUBLIC_FORM_SUBMIT_ACTION     = 'submit_public_form_action';
+	const DELETE_SUBMISSION_ACTION      = 'delete_submission';
+	const SUBMISSIONS_SETTINGS_ACTION   = 'submissions_settings';
+	const GENERAL_SETTINGS_ACTION       = 'general_settings';
+	const UPDATE_PLUGIN_SETTINGS_ACTION = 'update_plugin_settings';
 
 	public static function get_option( $key, $default_options = null ) {
-		$options = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );
-		return isset( $options[ $key ] ) ? $options[ $key ] : ( $default_options ?? self::DEFAULT_OPTIONS[ $key ] ?? null );
+		$option = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );
+
+		if ( empty( $option ) ) {
+			return $default_options ?? self::DEFAULT_OPTIONS[ $key ] ?? null;
+		}
+
+		return $option;
 	}
 
 	public static function add_option( $key, $value ) {
@@ -73,9 +81,10 @@ class Settings {
 	}
 
 	public static function update_option( $key, $value ) {
-		$options         = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );
-		$options[ $key ] = $value;
-		update_option( self::DEFAULT_PREFIX . $key, $options );
+		$option = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );
+		if ( ! empty( $option ) ) {
+			update_option( self::DEFAULT_PREFIX . $key, $value );
+		}
 	}
 
 	public static function apply_settings_callback( $callback ) {

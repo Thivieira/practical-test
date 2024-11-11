@@ -7341,14 +7341,20 @@ function generalSettingsTabHandler() {
         originalGeneralSettings: null,
         config: window.generalSettingsConfig,
         translations: window.generalSettingsTranslations,
+        errors: {
+            formError: "",
+            formSuccess: ""
+        },
+        loading: false,
         async init () {
+            this.formData = window.defaultOptions;
             await this.getGeneralSettings();
         },
         async getGeneralSettings () {
             const generalSettingsResponse = await fetch(this.config.ajax_url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    action: this.config.action,
+                    action: this.config.get_action,
                     security: this.config.security
                 })
             });
@@ -7380,18 +7386,29 @@ function submissionsTabHandler() {
             email_template: "default",
             notification_email: true,
             notification_email_from: "",
+            notification_email_subject: "Form submission",
             date_format: "mm/dd/yyyy"
         },
+        dateFormatOptions: [
+            "dd/mm/yyyy",
+            "mm/dd/yyyy"
+        ],
         config: window.submissionsConfig,
         translations: window.submissionsTranslations,
+        errors: {
+            formError: "",
+            formSuccess: ""
+        },
+        loading: false,
         async init () {
+            this.formData = window.defaultOptions;
             await this.getSubmissionsSettings();
         },
         async getSubmissionsSettings () {
             const submissionsSettingsResponse = await fetch(this.config.ajax_url, {
                 method: "POST",
                 body: new URLSearchParams({
-                    action: this.config.getSubmissionsSettingsAction,
+                    action: this.config.get_action,
                     security: this.config.security
                 })
             });
@@ -7402,6 +7419,7 @@ function submissionsTabHandler() {
                 email_template: submissionsSettingsData.email_template,
                 notification_email: submissionsSettingsData.notification_email,
                 notification_email_from: submissionsSettingsData.notification_email_from,
+                notification_email_subject: submissionsSettingsData.notification_email_subject,
                 date_format: submissionsSettingsData.date_format
             };
             this.formData = preparedFormData;
@@ -7424,7 +7442,7 @@ function submissionsTabHandler() {
             this.loading = true;
             try {
                 const data = {
-                    action: this.config.saveSubmissionsSettingsAction,
+                    action: this.config.save_action,
                     security: this.config.security,
                     post_data: JSON.stringify(this.formData)
                 };
@@ -7443,7 +7461,7 @@ function submissionsTabHandler() {
                     allowOutsideClick: false,
                     allowEscapeKey: false,
                     didClose: async ()=>{
-                        await this.fetchProfileData();
+                        await this.getSubmissionsSettings();
                     }
                 });
             } catch (error) {

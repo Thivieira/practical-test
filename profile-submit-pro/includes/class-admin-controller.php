@@ -20,12 +20,18 @@ class AdminController {
 	}
 
 	private function define_hooks() {
-		add_action( 'wp_ajax_get_plugin_settings', array( $this, 'get_plugin_settings' ) );
-		add_action( 'wp_ajax_update_plugin_settings', array( $this, 'update_plugin_settings' ) );
+		$ajax_actions = array(
+			Settings::SUBMISSIONS_SETTINGS_ACTION,
+			Settings::GENERAL_SETTINGS_ACTION,
+			Settings::DELETE_SUBMISSION_ACTION,
+			Settings::UPDATE_PLUGIN_SETTINGS_ACTION,
+		);
+		foreach ( $ajax_actions as $action ) {
+			add_action( "wp_ajax_$action", array( $this, $action ) );
+		}
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'show_user_profile', array( $this, 'render_profile_in_user_account' ) );
 		add_action( 'edit_user_profile', array( $this, 'render_profile_in_user_account' ) );
-		add_action( 'wp_ajax_delete_submission', array( $this, 'delete_submission' ) );
 	}
 
 	public function add_admin_menu() {
@@ -43,7 +49,7 @@ class AdminController {
 		add_submenu_page(
 			Settings::MENU['settings']['slug'],
 			Settings::MENU['settings']['submenu']['settings']['title'],
-			__( Settings::MENU['settings']['submenu']['settings']['menu_title'], 'profile-submit-pro' ), // Changed submenu title.
+			__( Settings::MENU['settings']['submenu']['settings']['menu_title'], 'profile-submit-pro' ),
 			Settings::MENU['settings']['submenu']['settings']['capability'],
 			Settings::MENU['settings']['submenu']['settings']['slug'],
 			array( $this, 'render_admin_page' )
@@ -51,24 +57,25 @@ class AdminController {
 
 		// Add submissions subpage.
 		add_submenu_page(
-			Settings::MENU['settings']['slug'], // Parent slug
-			Settings::MENU['settings']['submenu']['submissions']['title'], // Page title
-			Settings::MENU['settings']['submenu']['submissions']['menu_title'], // Menu title
-			Settings::MENU['settings']['submenu']['submissions']['capability'], // Capability
-			Settings::MENU['settings']['submenu']['submissions']['slug'], // Menu slug
-			array( $this, 'render_submissions_page' ) // Callback function
+			Settings::MENU['settings']['slug'],
+			Settings::MENU['settings']['submenu']['submissions']['title'],
+			Settings::MENU['settings']['submenu']['submissions']['menu_title'],
+			Settings::MENU['settings']['submenu']['submissions']['capability'],
+			Settings::MENU['settings']['submenu']['submissions']['slug'],
+			array( $this, 'render_submissions_page' )
 		);
 	}
 
 	public function render_profile_in_user_account( $user ) {
-		$public_key       = SubmissionManager::get_public_key_from_user_id( $user->ID );
-		$edit_profile_url = get_option( 'profile_submit_pro_shortcode_url' ) . '?key=' . $public_key;
-
-		if ( $public_key ) {
-			$profile = SubmissionManager::get_profile_from_user_id( $user->ID );
-			require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-link.php';
-			require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-show.php';
+		$public_key = SubmissionManager::get_public_key_from_user_id( $user->ID );
+		if ( ! $public_key ) {
+			return;
 		}
+		// Early return if no public key
+
+		$profile = SubmissionManager::get_profile_from_user_id( $user->ID );
+		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-link.php';
+		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-show.php';
 	}
 
 	public function render_admin_page() {
@@ -76,28 +83,25 @@ class AdminController {
 	}
 
 	public function render_submissions_page() {
-		$limit       = isset( $_GET['limit'] ) ? intval( $_GET['limit'] ) : 10;
-		$offset      = isset( $_GET['offset'] ) ? intval( $_GET['offset'] ) : 0;
-		$data        = $this->get_submissions( $limit, $offset );
-		$submissions = $data['submissions'];
-		$pagination  = $data['pagination'];
-
+		$limit  = intval( $_GET['limit'] ?? 10 );
+		$offset = intval( $_GET['offset'] ?? 0 );
+		$data   = $this->get_submissions( $limit, $offset );
 		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/submissions-page.php';
 	}
 
 	public function get_submissions( $limit = 10, $offset = 0 ) {
 		$table_name  = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
 		$submissions = $this->wpdb->get_results( "SELECT * FROM {$table_name} LIMIT {$limit} OFFSET {$offset}" );
-		$pagination  = $this->get_pagination( $limit, $offset );
 		return array(
 			'submissions' => $submissions,
-			'pagination'  => $pagination,
+			'pagination'  => $this->get_pagination( $limit, $offset ),
 		);
 	}
 
 	public function delete_submission() {
 		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], Settings::DELETE_SUBMISSION_ACTION ) ) {
 			wp_send_json_error( array( 'message' => 'Invalid security token' ) );
+			return;
 		}
 
 		$submission_id = intval( $_POST['id'] );
@@ -114,17 +118,14 @@ class AdminController {
 	public function get_pagination( $limit = 10, $offset = 0 ) {
 		$table_name        = $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE;
 		$total_submissions = $this->wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
-		$total_pages       = ceil( $total_submissions / $limit );
-		$current_page      = ( $offset / $limit ) + 1;
 		return array(
 			'total'        => $total_submissions,
-			'total_pages'  => $total_pages,
-			'current_page' => $current_page,
+			'total_pages'  => ceil( $total_submissions / $limit ),
+			'current_page' => ( $offset / $limit ) + 1,
 		);
 	}
 
-	public function get_plugin_settings() {
-
+	public function general_settings() {
 		$settings = array();
 		Settings::apply_settings_callback(
 			function ( $key, $value ) use ( &$settings ) {
@@ -137,31 +138,89 @@ class AdminController {
 		);
 		if ( empty( $settings ) ) {
 			wp_send_json_error( array( 'message' => 'No settings found' ) );
+			return; // Early return
 		}
 		wp_send_json_success( $settings );
 	}
 
 	public function update_plugin_settings() {
-
-		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], 'update_plugin_settings' ) ) {
-			wp_send_json_error( array( 'message' => 'Invalid security token' ) );
-			wp_die();
+		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], Settings::UPDATE_PLUGIN_SETTINGS_ACTION ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid security token' ), 400 );
+			return;
 		}
-		$post_data = sanitize_text_field( $_POST['post_data'] );
+
+		$post_data = $_POST['post_data'] ?? null;
+		$post_data = json_decode( stripslashes( $post_data ), true );
+		if ( is_null( $post_data ) ) {
+			error_log( 'Post data is null after decoding. Check JSON format.' );
+			wp_send_json_error( array( 'message' => 'Invalid JSON format' ), 400 );
+			return;
+		}
 
 		if ( empty( $post_data ) ) {
-			wp_send_json_error( array( 'message' => 'No data received' ) );
-			wp_die();
+			error_log( 'Post data is empty or not set.' . print_r( $_POST, true ) );
+			wp_send_json_error( array( 'message' => 'No data received' ), 400 );
+			return;
 		}
 
 		Settings::apply_settings_callback(
 			function ( $key, $value ) use ( $post_data ) {
-				Settings::update_option( Settings::DEFAULT_PREFIX . 'settings_' . $key, $post_data[ $key ] );
+				if ( array_key_exists( $key, $post_data ) ) {
+					Settings::update_option( $key, $post_data[ $key ] );
+				}
 			}
 		);
 
 		wp_send_json_success( array( 'message' => 'Plugin settings updated.' ) );
-		wp_die();
+	}
+
+	public function enqueue_settings_page_scripts() {
+		wp_localize_script( $this->plugin_name, 'defaultOptions', Settings::DEFAULT_OPTIONS );
+
+		$submissions_translations = array(
+			'errors'       => array(
+				'date_format'                => __( 'Date format must be a string', 'profile-submit-pro' ),
+				'notification_email_subject' => __( 'Notification e-mail subject must be a string', 'profile-submit-pro' ),
+				'notification_email_from'    => __( 'Notification email from must be a string', 'profile-submit-pro' ),
+				'notification_email'         => __( 'Notification email must be a boolean', 'profile-submit-pro' ),
+				'email_template'             => __( 'Email template must be a string', 'profile-submit-pro' ),
+				'daily_submission_limit'     => __( 'Daily submissions limit must be a number', 'profile-submit-pro' ),
+				'formSuccess'                => __( 'Form submitted successfully!', 'profile-submit-pro' ),
+				'formError'                  => __( 'Please correct the errors before submitting', 'profile-submit-pro' ),
+			),
+			'placeholders' => array(
+				'date_format'                => __( 'Date format', 'profile-submit-pro' ),
+				'notification_email_from'    => __( 'Notification e-mail from address', 'profile-submit-pro' ),
+				'notification_email_subject' => __( 'Notification e-mail subject', 'profile-submit-pro' ),
+				'daily_submission_limit'     => __( 'Daily submissions limit', 'profile-submit-pro' ),
+			),
+		);
+
+		$submissions_config = array(
+			'get_action'  => Settings::GENERAL_SETTINGS_ACTION,
+			'save_action' => Settings::UPDATE_PLUGIN_SETTINGS_ACTION,
+			'ajax_url'    => admin_url( 'admin-ajax.php' ),
+			'security'    => wp_create_nonce( Settings::UPDATE_PLUGIN_SETTINGS_ACTION ),
+		);
+
+		wp_localize_script( $this->plugin_name, 'submissionsTranslations', $submissions_translations );
+		wp_localize_script( $this->plugin_name, 'submissionsConfig', $submissions_config );
+
+		$general_settings_translations = array(
+			'errors' => array(
+				'clean_uninstall' => __( 'Clean uninstall must be a boolean', 'profile-submit-pro' ),
+			),
+		);
+
+		$general_settings_config = array(
+			'get_action'  => Settings::GENERAL_SETTINGS_ACTION,
+			'save_action' => Settings::UPDATE_PLUGIN_SETTINGS_ACTION,
+			'ajax_url'    => admin_url( 'admin-ajax.php' ),
+			'security'    => wp_create_nonce( Settings::UPDATE_PLUGIN_SETTINGS_ACTION ),
+		);
+
+		wp_localize_script( $this->plugin_name, 'generalSettingsTranslations', $general_settings_translations );
+		wp_localize_script( $this->plugin_name, 'generalSettingsConfig', $general_settings_config );
 	}
 
 	public function enqueue_submissions_page_scripts() {
@@ -174,64 +233,11 @@ class AdminController {
 		wp_localize_script( $this->plugin_name, 'submissionsPageConfig', $submissions_page_config );
 	}
 
-	public function enqueue_alpine_form() {
-		$form_translations = array(
-			'errors'       => array(
-				'name'           => __( 'Name must be at least 3 characters long', 'profile-submit-pro' ),
-				'email'          => __( 'Invalid email address', 'profile-submit-pro' ),
-				'emailExists'    => __( 'Email already exists', 'profile-submit-pro' ),
-				'username'       => __( 'Username must be at least 3 characters long', 'profile-submit-pro' ),
-				'usernameExists' => __( 'Username already exists', 'profile-submit-pro' ),
-				'password'       => __( 'Password must have at least 8 characters, including letters and numbers', 'profile-submit-pro' ),
-				'phone'          => __( 'Invalid phone number', 'profile-submit-pro' ),
-				'birthdate'      => __( 'It must be a valid date', 'profile-submit-pro' ),
-				'address'        => array(
-					'street'        => __( 'Street is too short', 'profile-submit-pro' ),
-					'street_number' => __( 'street_number is too short', 'profile-submit-pro' ),
-					'city'          => __( 'City is too short', 'profile-submit-pro' ),
-					'state'         => __( 'State is too short', 'profile-submit-pro' ),
-					'postal_code'   => __( 'Postal code is too short', 'profile-submit-pro' ),
-					'country'       => __( 'Select a country', 'profile-submit-pro' ),
-				),
-				'interests'      => __( 'Please select at least 3 interests', 'profile-submit-pro' ),
-				'cv'             => __( 'Your CV must be at least 20 characters long', 'profile-submit-pro' ),
-				'formSuccess'    => __( 'Form submitted successfully!', 'profile-submit-pro' ),
-				'formError'      => __( 'Please correct the errors before submitting', 'profile-submit-pro' ),
-			),
-			'placeholders' => array(
-				'name'       => __( 'Your name', 'profile-submit-pro' ),
-				'email'      => __( 'Your email', 'profile-submit-pro' ),
-				'username'   => __( 'Your username', 'profile-submit-pro' ),
-				'password'   => __( 'Your password', 'profile-submit-pro' ),
-				'phone'      => __( 'Your phone number', 'profile-submit-pro' ),
-				'birthdate'  => __( 'Your date of birth', 'profile-submit-pro' ),
-				'address'    => __( 'Your address', 'profile-submit-pro' ),
-				'interests'  => __( 'Your interests', 'profile-submit-pro' ),
-				'cv'         => __( 'Your CV', 'profile-submit-pro' ),
-				'dateFormat' => __( 'mm/dd/yyyy', 'profile-submit-pro' ),
-			),
-		);
-
-		$form_config = array(
-			'action'       => 'update_plugin_settings',
-			'ajax_url'     => admin_url( 'admin-ajax.php' ),
-			'security'     => wp_create_nonce( 'update_plugin_settings' ),
-			'redirect_url' => '/',
-		);
-
-		wp_localize_script(
-			$this->plugin_name,
-			'formTranslations',
-			$form_translations
-		);
-		wp_localize_script( $this->plugin_name, 'formConfig', $form_config );
-	}
-
 	public function enqueue_scripts( $hook ) {
-		// Only enqueue on plugin pages
 		if ( strpos( $hook, 'profile-submit-pro' ) === false ) {
 			return;
 		}
+		// Early return
 
 		wp_enqueue_style(
 			$this->plugin_name,
@@ -249,13 +255,10 @@ class AdminController {
 			array( 'strategy' => 'defer' )
 		);
 
-		$this->enqueue_alpine_form();
+		$this->enqueue_settings_page_scripts();
 		$this->enqueue_submissions_page_scripts();
 	}
 
-	/**
-	 * Delete all plugin data
-	 */
 	private function delete_all_data() {
 		// Delete all data
 	}

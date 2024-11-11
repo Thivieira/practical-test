@@ -10,14 +10,20 @@ export function generalSettingsTabHandler() {
     originalGeneralSettings: null,
     config: window.generalSettingsConfig,
     translations: window.generalSettingsTranslations,
+    errors: {
+      formError: '',
+      formSuccess: '',
+    },
+    loading: false,
     async init() {
+      this.formData = window.defaultOptions;
       await this.getGeneralSettings();
     },
     async getGeneralSettings() {
       const generalSettingsResponse = await fetch(this.config.ajax_url, {
         method: 'POST',
         body: new URLSearchParams({
-          action: this.config.action,
+          action: this.config.get_action,
           security: this.config.security,
         }),
       });
