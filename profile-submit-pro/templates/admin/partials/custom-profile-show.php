@@ -13,6 +13,10 @@
 		<td><?php echo esc_html( $profile->phone ); ?></td>
 	</tr>
 	<tr>
+		<th>Birthdate</th>
+		<td><?php echo esc_html( $profile->birthdate ); ?></td>
+	</tr>
+	<tr>
 		<th>Address</th>
 		<td><?php echo esc_html( $profile->street ); ?></td>
 	</tr>

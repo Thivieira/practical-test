@@ -1,5 +1,4 @@
 import Swal from 'sweetalert2';
-import intlTelInput from 'intl-tel-input';
 import { getCountries, isErrorObjectEmpty, loadIntlTelInput } from '../utils';
 
 export function formHandler() {

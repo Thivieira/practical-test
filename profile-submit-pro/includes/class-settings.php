@@ -57,8 +57,11 @@ class Settings {
 
 	const SUBMISSIONS_TABLE = self::DEFAULT_PREFIX . 'submissions';
 
-	const PROFILE_FORM_SUBMIT_ACTION = 'submit_profile_form_action';
-	const PUBLIC_FORM_SUBMIT_ACTION  = 'submit_public_form_action';
+	const PROFILE_FORM_SUBMIT_ACTION  = 'submit_profile_form_action';
+	const PUBLIC_FORM_SUBMIT_ACTION   = 'submit_public_form_action';
+	const DELETE_SUBMISSION_ACTION    = 'delete_submission';
+	const SUBMISSIONS_SETTINGS_ACTION = 'submissions_settings';
+	const GENERAL_SETTINGS_ACTION     = 'general_settings';
 
 	public static function get_option( $key, $default_options = null ) {
 		$options = get_option( self::DEFAULT_PREFIX . $key, self::DEFAULT_OPTIONS[ $key ] );

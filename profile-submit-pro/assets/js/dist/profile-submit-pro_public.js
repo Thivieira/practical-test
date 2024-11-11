@@ -142,10 +142,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"29SiD":[function(require,module,exports) {
+})({"7HTOo":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
-var HMR_PORT = 37949;
+var HMR_PORT = 44943;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "d6ea1d42532a7575";
 var HMR_USE_SSE = false;
@@ -3836,11 +3836,6 @@ function profileFormHandler() {
             else this.errors.birthdate = "";
         },
         validateIfFormIsChanged () {
-            console.log("FormIsChanged: ", JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile));
-            console.log({
-                street_number: this.formData.address.street_number,
-                originalstreet_number: this.originalProfile.address.street_number
-            });
             return JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile);
         },
         async validateForm () {
@@ -11196,6 +11191,6 @@ function formHandler() {
     };
 }
 
-},{"sweetalert2":"1HyFr","../utils":"hFIk5","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}]},["29SiD","fyuRC"], "fyuRC", "parcelRequire4480")
+},{"sweetalert2":"1HyFr","../utils":"hFIk5","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}]},["7HTOo","fyuRC"], "fyuRC", "parcelRequire4480")
 
 //# sourceMappingURL=profile-submit-pro_public.js.map

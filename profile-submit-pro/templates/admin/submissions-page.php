@@ -3,7 +3,7 @@
 		<h1 class="text-2xl font-bold mb-4">Submissions</h1>
 	</div>
 <!-- if there are submissions, show a table -->
-	<div class="">
+	<div x-data="submissionsPageHandler">
 		<div class="relative overflow-x-autosm:rounded-lg">
 			<table class="w-full  shadow-md  text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 				<thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -50,8 +50,9 @@
 						<td class="px-6 py-4">
 							<?php echo esc_html( gmdate( 'm/d/Y', strtotime( $submission->submitted_at ) ) ); ?>
 						</td>
-						<td class="px-6 py-4">
+						<td class="px-6 py-4 flex gap-4">
 							<a href="<?php echo esc_url( $profile_link ); ?>" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Profile link</a>
+							<button @click="deleteRecord(<?php echo esc_attr( $submission->id ); ?>)" class="font-medium text-red-600 dark:text-red-500 hover:underline">Delete</button>
 						</td>
 					</tr>
 					<?php endforeach; ?>

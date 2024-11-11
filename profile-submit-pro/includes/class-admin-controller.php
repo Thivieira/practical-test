@@ -96,6 +96,19 @@ class AdminController {
 	}
 
 	public function delete_submission() {
+		if ( ! isset( $_POST['security'] ) || ! wp_verify_nonce( $_POST['security'], Settings::DELETE_SUBMISSION_ACTION ) ) {
+			wp_send_json_error( array( 'message' => 'Invalid security token' ) );
+		}
+
+		$submission_id = intval( $_POST['id'] );
+		$delete_user   = isset( $_POST['deleteUser'] ) ? sanitize_text_field( $_POST['deleteUser'] ) : false;
+
+		$this->wpdb->delete( $this->wpdb->prefix . Settings::SUBMISSIONS_TABLE, array( 'id' => $submission_id ) );
+		if ( $delete_user ) {
+			wp_delete_user( $submission_id );
+		}
+
+		wp_send_json_success( array( 'message' => $delete_user ? 'Submission and user deleted.' : 'Submission deleted.' ) );
 	}
 
 	public function get_pagination( $limit = 10, $offset = 0 ) {
@@ -151,41 +164,51 @@ class AdminController {
 		wp_die();
 	}
 
+	public function enqueue_submissions_page_scripts() {
+		$submissions_page_config = array(
+			'action'   => Settings::DELETE_SUBMISSION_ACTION,
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'security' => wp_create_nonce( Settings::DELETE_SUBMISSION_ACTION ),
+		);
+
+		wp_localize_script( $this->plugin_name, 'submissionsPageConfig', $submissions_page_config );
+	}
+
 	public function enqueue_alpine_form() {
 		$form_translations = array(
 			'errors'       => array(
-				'name'           => __( 'Name must be at least 3 characters long', 'your-text-domain' ),
-				'email'          => __( 'Invalid email address', 'your-text-domain' ),
-				'emailExists'    => __( 'Email already exists', 'your-text-domain' ),
-				'username'       => __( 'Username must be at least 3 characters long', 'your-text-domain' ),
-				'usernameExists' => __( 'Username already exists', 'your-text-domain' ),
-				'password'       => __( 'Password must have at least 8 characters, including letters and numbers', 'your-text-domain' ),
-				'phone'          => __( 'Invalid phone number', 'your-text-domain' ),
-				'birthdate'      => __( 'It must be a valid date', 'your-text-domain' ),
+				'name'           => __( 'Name must be at least 3 characters long', 'profile-submit-pro' ),
+				'email'          => __( 'Invalid email address', 'profile-submit-pro' ),
+				'emailExists'    => __( 'Email already exists', 'profile-submit-pro' ),
+				'username'       => __( 'Username must be at least 3 characters long', 'profile-submit-pro' ),
+				'usernameExists' => __( 'Username already exists', 'profile-submit-pro' ),
+				'password'       => __( 'Password must have at least 8 characters, including letters and numbers', 'profile-submit-pro' ),
+				'phone'          => __( 'Invalid phone number', 'profile-submit-pro' ),
+				'birthdate'      => __( 'It must be a valid date', 'profile-submit-pro' ),
 				'address'        => array(
-					'street'        => __( 'Street is too short', 'your-text-domain' ),
-					'street_number' => __( 'street_number is too short', 'your-text-domain' ),
-					'city'          => __( 'City is too short', 'your-text-domain' ),
-					'state'         => __( 'State is too short', 'your-text-domain' ),
-					'postal_code'   => __( 'ZipCode is too short', 'your-text-domain' ),
-					'country'       => __( 'Select a country', 'your-text-domain' ),
+					'street'        => __( 'Street is too short', 'profile-submit-pro' ),
+					'street_number' => __( 'street_number is too short', 'profile-submit-pro' ),
+					'city'          => __( 'City is too short', 'profile-submit-pro' ),
+					'state'         => __( 'State is too short', 'profile-submit-pro' ),
+					'postal_code'   => __( 'Postal code is too short', 'profile-submit-pro' ),
+					'country'       => __( 'Select a country', 'profile-submit-pro' ),
 				),
-				'interests'      => __( 'Please select at least 3 interests', 'your-text-domain' ),
-				'cv'             => __( 'Your CV must be at least 20 characters long', 'your-text-domain' ),
-				'formSuccess'    => __( 'Form submitted successfully!', 'your-text-domain' ),
-				'formError'      => __( 'Please correct the errors before submitting', 'your-text-domain' ),
+				'interests'      => __( 'Please select at least 3 interests', 'profile-submit-pro' ),
+				'cv'             => __( 'Your CV must be at least 20 characters long', 'profile-submit-pro' ),
+				'formSuccess'    => __( 'Form submitted successfully!', 'profile-submit-pro' ),
+				'formError'      => __( 'Please correct the errors before submitting', 'profile-submit-pro' ),
 			),
 			'placeholders' => array(
-				'name'       => __( 'Your name', 'your-text-domain' ),
-				'email'      => __( 'Your email', 'your-text-domain' ),
-				'username'   => __( 'Your username', 'your-text-domain' ),
-				'password'   => __( 'Your password', 'your-text-domain' ),
-				'phone'      => __( 'Your phone number', 'your-text-domain' ),
-				'birthdate'  => __( 'Your date of birth', 'your-text-domain' ),
-				'address'    => __( 'Your address', 'your-text-domain' ),
-				'interests'  => __( 'Your interests', 'your-text-domain' ),
-				'cv'         => __( 'Your CV', 'your-text-domain' ),
-				'dateFormat' => __( 'mm/dd/yyyy', 'your-text-domain' ),
+				'name'       => __( 'Your name', 'profile-submit-pro' ),
+				'email'      => __( 'Your email', 'profile-submit-pro' ),
+				'username'   => __( 'Your username', 'profile-submit-pro' ),
+				'password'   => __( 'Your password', 'profile-submit-pro' ),
+				'phone'      => __( 'Your phone number', 'profile-submit-pro' ),
+				'birthdate'  => __( 'Your date of birth', 'profile-submit-pro' ),
+				'address'    => __( 'Your address', 'profile-submit-pro' ),
+				'interests'  => __( 'Your interests', 'profile-submit-pro' ),
+				'cv'         => __( 'Your CV', 'profile-submit-pro' ),
+				'dateFormat' => __( 'mm/dd/yyyy', 'profile-submit-pro' ),
 			),
 		);
 
@@ -227,6 +250,7 @@ class AdminController {
 		);
 
 		$this->enqueue_alpine_form();
+		$this->enqueue_submissions_page_scripts();
 	}
 
 	/**

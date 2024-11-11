@@ -225,14 +225,6 @@ export function profileFormHandler() {
       }
     },
     validateIfFormIsChanged() {
-      console.log(
-        'FormIsChanged: ',
-        JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile),
-      );
-      console.log({
-        street_number: this.formData.address.street_number,
-        originalstreet_number: this.originalProfile.address.street_number,
-      });
       return (
         JSON.stringify(this.formData) !== JSON.stringify(this.originalProfile)
       );
