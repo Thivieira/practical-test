@@ -102,7 +102,7 @@ class Submission {
 	public function verify_email_exists() {
 		$email = sanitize_email( $_POST['email'] );
 
-		if ( ! empty( $email ) ) {
+		if ( empty( $email ) ) {
 			wp_send_json_error( array( 'message' => 'Email is required' ) );
 			wp_die();
 		}
@@ -147,7 +147,7 @@ class Submission {
 	public function verify_username_exists() {
 		$username = sanitize_user( $_POST['username'] );
 
-		if ( ! empty( $username ) ) {
+		if ( empty( $username ) ) {
 			wp_send_json_error( array( 'message' => 'Username is required' ) );
 			wp_die();
 		}

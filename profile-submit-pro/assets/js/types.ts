@@ -28,3 +28,16 @@ export type Country = {
   name: string;
   code: string;
 };
+
+
+export type GeneralSettings = {
+  clean_uninstall: boolean;
+};
+
+export type SubmissionsSettings = {
+  daily_submission_limit: number;
+  email_template: string;
+  notification_email: boolean;
+  notification_email_from: string;
+  date_format: string;
+};

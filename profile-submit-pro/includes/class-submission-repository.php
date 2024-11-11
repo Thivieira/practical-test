@@ -71,11 +71,15 @@ class SubmissionRepository {
 	}
 
 	public function verify_email_exists( $email ) {
-		return $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->wpdb->users} WHERE user_email = %s", $email ) );
+		$wordpress_user = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->wpdb->users} WHERE user_email = %s", $email ) );
+		$submission     = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE email = %s", $email ) );
+		return $wordpress_user || $submission;
 	}
 
 	public function verify_username_exists( $username ) {
-		return $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->wpdb->users} WHERE user_login = %s", $username ) );
+		$wordpress_user = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->wpdb->users} WHERE user_login = %s", $username ) );
+		$submission     = $this->wpdb->get_row( $this->wpdb->prepare( "SELECT * FROM {$this->table_name} WHERE username = %s", $username ) );
+		return $wordpress_user || $submission;
 	}
 
 	public function register_user_if_not_exists( $post_data_id, $input_data ) {
