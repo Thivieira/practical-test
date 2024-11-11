@@ -19,7 +19,6 @@ class Activator {
 
             street varchar(255) NOT NULL,
             street_number varchar(20),
-            neighborhood varchar(100),
             city varchar(100) NOT NULL,
             state varchar(100),
             postal_code varchar(20),
@@ -48,7 +47,6 @@ class Activator {
 			'birthdate'         => 'date NOT NULL',
 			'street'            => 'varchar(255) NOT NULL',
 			'street_number'     => 'varchar(20)',
-			'neighborhood'      => 'varchar(100)',
 			'city'              => 'varchar(100) NOT NULL',
 			'state'             => 'varchar(100)',
 			'postal_code'       => 'varchar(20)',

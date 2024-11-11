@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@alpinejs/mask": "^3.14.3",
     "alpinejs": "^3.14.3",
     "dayjs": "^1.11.13",
     "intl-tel-input": "^24.6.0",

@@ -11,10 +11,11 @@ export const isErrorObjectEmpty = (error: any): boolean => {
 
 export const formatDate = (
   date: string,
-  format: string = 'DD/MM/YYYY',
+  dateFormat: string = 'MM/DD/YYYY',
+  format: string = 'MM/DD/YYYY',
 ): string => {
   if (!date) return '';
-  return dayjs(date).format(format);
+  return dayjs(date, dateFormat).format(format);
 };
 
 export const getCountries = async (): Promise<Country[]> => {

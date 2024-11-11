@@ -15,7 +15,7 @@
 			</div>
 			<div class="my-4 w-full md:w-1/3">
 				<label for="date_format" class="block text-sm font-medium text-gray-700 mb-2">Date format</label>
-				<select x-model="formData.date_format" id="date_format" name="date_format" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+				<select x-model="formData.date_format" id="date_format" name="date_format" class="mt-1 block w-full rounded-md !max-w-full border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
 					<template x-for="dateFormatOption in dateFormatOptions">
 						<option :selected="formData.date_format === dateFormatOption" :value="dateFormatOption">
 							<span x-text="dateFormatOption"></span>

@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2';
-import { getCountries, isErrorObjectEmpty, loadIntlTelInput } from '../utils';
+import { formatDate, getCountries, isErrorObjectEmpty, loadIntlTelInput } from '../utils';
 
 export function formHandler() {
   return {
@@ -216,10 +216,7 @@ export function formHandler() {
       }
 
       // format date
-      this.formData.birthdate = this.formData.birthdate.replace(
-        /(\d{2})(\d{2})(\d{4})/,
-        '$3-$2-$1',
-      );
+      this.formData.birthdate = formatDate(this.formData.birthdate, this.dateFormat, 'YYYY-MM-DD');
 
       this.loading = true;
 
@@ -238,7 +235,11 @@ export function formHandler() {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          const error = await response.json();
+          if (error?.data?.message) {
+            throw new Error(error.data.message);
+          }
+          throw new Error('There was a problem in the server. Please try again later.');
         }
 
         this.formData = {};
@@ -258,7 +259,7 @@ export function formHandler() {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'There was a problem in the server. Please try again later.',
+          text: error.message || 'There was a problem in the server. Please try again later.',
         });
         return false;
       }

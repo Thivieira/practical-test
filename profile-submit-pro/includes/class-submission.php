@@ -122,7 +122,6 @@ class Submission {
 			}
 		}
 
-		// Query the database to check if the email exists
 		$user = $this->repository->verify_email_exists( $email );
 
 		if ( $user ) {
@@ -237,7 +236,9 @@ class Submission {
 		$email      = sanitize_email( $this->post_data['email'] );
 		$username   = sanitize_user( $this->post_data['username'] );
 		$phone      = sanitize_text_field( $this->post_data['phone'] );
-		$birth_date = sanitize_text_field( $this->post_data['birthdate'] );
+		$birth_date = $this->ensure_birth_date_format( sanitize_text_field( $this->post_data['birthdate'] ) );
+
+		error_log( 'birth_date: ' . print_r( $birth_date, true ) );
 
 		$street        = sanitize_text_field( $this->post_data['address']['street'] );
 		$street_number = sanitize_text_field( $this->post_data['address']['street_number'] );
@@ -272,6 +273,32 @@ class Submission {
 		}
 
 		return $input_data;
+	}
+
+	private function ensure_birth_date_format( $birth_date ) {
+
+		if ( empty( $birth_date ) ) {
+			return false;
+		}
+
+		error_log( 'birth_date: ' . print_r( $birth_date, true ) );
+
+		// verify if format is valid
+		if ( ! preg_match( '/^\d{2}\/\d{2}\/\d{4}$/', $birth_date ) ) {
+			return $birth_date;
+		}
+
+		$date_format = Settings::get_option( 'date_format' );
+
+		$date_format = str_replace( array( 'MM', 'DD', 'YYYY' ), array( 'm', 'd', 'Y' ), $date_format );
+
+		$date = \DateTime::createFromFormat( $date_format, $birth_date );
+
+		if ( ! $date ) {
+			return false;
+		}
+
+		return $date->format( 'Y-m-d' );
 	}
 
 	public function save() {

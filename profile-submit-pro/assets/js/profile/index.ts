@@ -1,7 +1,6 @@
 import Swal from 'sweetalert2';
 import { formatDate, getCountries, isErrorObjectEmpty, loadIntlTelInput } from '../utils';
 import { Profile, WordpressJsonResponse } from '../types';
-import dayjs from '../dayjs';
 
 export function profileFormHandler() {
   return {
@@ -205,24 +204,8 @@ export function profileFormHandler() {
       this.errors.cv =
         this.formData.cv.length < 20 ? this.translations.errors.cv : '';
     },
-    formatAndValidatebirthdate() {
-      this.formData.birthdate = formatDate(
-        this.formData.birthdate,
-        this.dateFormat,
-      );
-      this.validatebirthdate();
-    },
     validatebirthdate() {
-      if (!this.formData.birthdate) {
-        this.errors.birthdate = this.translations.errors.birthdate;
-        return;
-      }
-      const parsedDate = new Date(this.formData.birthdate);
-      if (isNaN(parsedDate.getTime())) {
-        this.errors.birthdate = this.translations.errors.birthdate;
-      } else {
-        this.errors.birthdate = '';
-      }
+
     },
     validateIfFormIsChanged() {
       return (
@@ -258,7 +241,7 @@ export function profileFormHandler() {
       }
 
       // format date
-      this.formData.birthdate = dayjs(this.formData.birthdate).format('YYYY-MM-DD');
+      this.formData.birthdate = formatDate(this.formData.birthdate, this.dateFormat, 'YYYY-MM-DD');
 
       this.loading = true;
 
@@ -278,7 +261,11 @@ export function profileFormHandler() {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          const error = await response.json();
+          if (error?.data?.message) {
+            throw new Error(error.data.message);
+          }
+          throw new Error('There was a problem in the server. Please try again later.');
         }
 
         Swal.fire({
@@ -296,7 +283,7 @@ export function profileFormHandler() {
         Swal.fire({
           icon: 'error',
           title: 'Oops...',
-          text: 'There was a problem in the server. Please try again later.',
+          text: error.message || 'There was a problem in the server. Please try again later.',
         });
         return false;
       }

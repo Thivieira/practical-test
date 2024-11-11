@@ -598,9 +598,9 @@ var _dayjsDefault = parcelHelpers.interopDefault(_dayjs);
 const isErrorObjectEmpty = (error)=>{
     return typeof error === "object" && Object.values(error).every((e)=>e === "");
 };
-const formatDate = (date, format = "DD/MM/YYYY")=>{
+const formatDate = (date, dateFormat = "MM/DD/YYYY", format = "MM/DD/YYYY")=>{
     if (!date) return "";
-    return (0, _dayjsDefault.default)(date).format(format);
+    return (0, _dayjsDefault.default)(date, dateFormat).format(format);
 };
 const getCountries = async ()=>{
     const response = await fetch("/wp-content/plugins/profile-submit-pro/assets/countries.json");

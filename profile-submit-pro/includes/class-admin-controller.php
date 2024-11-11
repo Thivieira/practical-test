@@ -71,9 +71,9 @@ class AdminController {
 		if ( ! $public_key ) {
 			return;
 		}
-		// Early return if no public key
 
-		$profile = SubmissionManager::get_profile_from_user_id( $user->ID );
+		$edit_profile_url = Settings::get_option( 'shortcode_url' ) . '?key=' . $public_key;
+		$profile          = SubmissionManager::get_profile_from_user_id( $user->ID );
 		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-link.php';
 		require_once plugin_dir_path( __DIR__ ) . 'templates/admin/partials/custom-profile-show.php';
 	}

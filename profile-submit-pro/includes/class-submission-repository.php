@@ -62,6 +62,7 @@ class SubmissionRepository {
 
 	private function update_submission( $input_data, $id ) {
 		try {
+			error_log( print_r( $input_data, true ) );
 			$this->wpdb->update( $this->table_name, $input_data, array( 'id' => $id ) );
 			return true;
 		} catch ( \Exception $e ) {

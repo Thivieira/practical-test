@@ -99,7 +99,7 @@
         x-model="formData.birthdate"
         autocomplete="bday"
         :placeholder="translations.placeholders.birthdate + ' - ' + translations.placeholders.dateFormat"
-        @input="formatAndValidatebirthdate"
+        x-mask="99/99/9999"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       <span
         x-show="errors.birthdate"
@@ -242,11 +242,11 @@
         id="cv"
         x-model="formData.cv"
         @input="validateCv"
-        rows="10"
+        rows="20"
         autocomplete="cv"
 
         :placeholder="translations.placeholders.cv"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+        class="mt-1 bg-slate-50 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
       <span
         x-show="errors.cv"
         class="error text-red-500 text-sm"

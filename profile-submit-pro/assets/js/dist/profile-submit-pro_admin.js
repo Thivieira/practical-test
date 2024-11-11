@@ -587,14 +587,17 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _alpinejs = require("alpinejs");
 var _alpinejsDefault = parcelHelpers.interopDefault(_alpinejs);
+var _mask = require("@alpinejs/mask");
+var _maskDefault = parcelHelpers.interopDefault(_mask);
 var _submissionsPage = require("./admin/submissions-page");
 var _settingsPage = require("./admin/settings-page");
 if (module.hot) module.hot.accept();
+(0, _alpinejsDefault.default).plugin((0, _maskDefault.default));
 (0, _alpinejsDefault.default).data("submissionsPageHandler", (0, _submissionsPage.submissionsPageHandler));
 (0, _alpinejsDefault.default).data("settingsPageHandler", (0, _settingsPage.settingsPageHandler));
 (0, _alpinejsDefault.default).start();
 
-},{"alpinejs":"69hXP","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP","./admin/submissions-page":"7p6BA","./admin/settings-page":"7wbvo"}],"69hXP":[function(require,module,exports) {
+},{"alpinejs":"69hXP","@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP","./admin/submissions-page":"7p6BA","./admin/settings-page":"7wbvo","@alpinejs/mask":"Wq5VZ"}],"69hXP":[function(require,module,exports) {
 // packages/alpinejs/src/scheduler.js
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -7387,11 +7390,11 @@ function submissionsTabHandler() {
             notification_email: true,
             notification_email_from: "",
             notification_email_subject: "Form submission",
-            date_format: "mm/dd/yyyy"
+            date_format: "MM/DD/YYYY"
         },
         dateFormatOptions: [
-            "dd/mm/yyyy",
-            "mm/dd/yyyy"
+            "DD/MM/YYYY",
+            "MM/DD/YYYY"
         ],
         config: window.submissionsConfig,
         translations: window.submissionsTranslations,
@@ -7494,9 +7497,9 @@ var _dayjsDefault = parcelHelpers.interopDefault(_dayjs);
 const isErrorObjectEmpty = (error)=>{
     return typeof error === "object" && Object.values(error).every((e)=>e === "");
 };
-const formatDate = (date, format = "DD/MM/YYYY")=>{
+const formatDate = (date, dateFormat = "MM/DD/YYYY", format = "MM/DD/YYYY")=>{
     if (!date) return "";
-    return (0, _dayjsDefault.default)(date).format(format);
+    return (0, _dayjsDefault.default)(date, dateFormat).format(format);
 };
 const getCountries = async ()=>{
     const response = await fetch("/wp-content/plugins/profile-submit-pro/assets/countries.json");
@@ -10957,6 +10960,173 @@ exports.getOrigin = getOrigin;
     return factoryOutput.default;
 });
 
-},{}]},["gk2UF","f7HqZ"], "f7HqZ", "parcelRequire4480")
+},{}],"Wq5VZ":[function(require,module,exports) {
+// packages/mask/src/index.js
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>module_default);
+parcelHelpers.export(exports, "mask", ()=>src_default);
+parcelHelpers.export(exports, "stripDown", ()=>stripDown);
+function src_default(Alpine) {
+    Alpine.directive("mask", (el, { value, expression }, { effect, evaluateLater, cleanup })=>{
+        let templateFn = ()=>expression;
+        let lastInputValue = "";
+        queueMicrotask(()=>{
+            if ([
+                "function",
+                "dynamic"
+            ].includes(value)) {
+                let evaluator = evaluateLater(expression);
+                effect(()=>{
+                    templateFn = (input)=>{
+                        let result;
+                        Alpine.dontAutoEvaluateFunctions(()=>{
+                            evaluator((value2)=>{
+                                result = typeof value2 === "function" ? value2(input) : value2;
+                            }, {
+                                scope: {
+                                    // These are "magics" we'll make available to the x-mask:function:
+                                    "$input": input,
+                                    "$money": formatMoney.bind({
+                                        el
+                                    })
+                                }
+                            });
+                        });
+                        return result;
+                    };
+                    processInputValue(el, false);
+                });
+            } else processInputValue(el, false);
+            if (el._x_model) el._x_model.set(el.value);
+        });
+        const controller = new AbortController();
+        cleanup(()=>{
+            controller.abort();
+        });
+        el.addEventListener("input", ()=>processInputValue(el), {
+            signal: controller.signal,
+            // Setting this as a capture phase listener to ensure it runs
+            // before wire:model or x-model added as a latent binding...
+            capture: true
+        });
+        el.addEventListener("blur", ()=>processInputValue(el, false), {
+            signal: controller.signal
+        });
+        function processInputValue(el2, shouldRestoreCursor = true) {
+            let input = el2.value;
+            let template = templateFn(input);
+            if (!template || template === "false") return false;
+            if (lastInputValue.length - el2.value.length === 1) return lastInputValue = el2.value;
+            let setInput = ()=>{
+                lastInputValue = el2.value = formatInput(input, template);
+            };
+            if (shouldRestoreCursor) restoreCursorPosition(el2, template, ()=>{
+                setInput();
+            });
+            else setInput();
+        }
+        function formatInput(input, template) {
+            if (input === "") return "";
+            let strippedDownInput = stripDown(template, input);
+            let rebuiltInput = buildUp(template, strippedDownInput);
+            return rebuiltInput;
+        }
+    }).before("model");
+}
+function restoreCursorPosition(el, template, callback) {
+    let cursorPosition = el.selectionStart;
+    let unformattedValue = el.value;
+    callback();
+    let beforeLeftOfCursorBeforeFormatting = unformattedValue.slice(0, cursorPosition);
+    let newPosition = buildUp(template, stripDown(template, beforeLeftOfCursorBeforeFormatting)).length;
+    el.setSelectionRange(newPosition, newPosition);
+}
+function stripDown(template, input) {
+    let inputToBeStripped = input;
+    let output = "";
+    let regexes = {
+        "9": /[0-9]/,
+        "a": /[a-zA-Z]/,
+        "*": /[a-zA-Z0-9]/
+    };
+    let wildcardTemplate = "";
+    for(let i = 0; i < template.length; i++){
+        if ([
+            "9",
+            "a",
+            "*"
+        ].includes(template[i])) {
+            wildcardTemplate += template[i];
+            continue;
+        }
+        for(let j = 0; j < inputToBeStripped.length; j++)if (inputToBeStripped[j] === template[i]) {
+            inputToBeStripped = inputToBeStripped.slice(0, j) + inputToBeStripped.slice(j + 1);
+            break;
+        }
+    }
+    for(let i = 0; i < wildcardTemplate.length; i++){
+        let found = false;
+        for(let j = 0; j < inputToBeStripped.length; j++)if (regexes[wildcardTemplate[i]].test(inputToBeStripped[j])) {
+            output += inputToBeStripped[j];
+            inputToBeStripped = inputToBeStripped.slice(0, j) + inputToBeStripped.slice(j + 1);
+            found = true;
+            break;
+        }
+        if (!found) break;
+    }
+    return output;
+}
+function buildUp(template, input) {
+    let clean = Array.from(input);
+    let output = "";
+    for(let i = 0; i < template.length; i++){
+        if (![
+            "9",
+            "a",
+            "*"
+        ].includes(template[i])) {
+            output += template[i];
+            continue;
+        }
+        if (clean.length === 0) break;
+        output += clean.shift();
+    }
+    return output;
+}
+function formatMoney(input, delimiter = ".", thousands, precision = 2) {
+    if (input === "-") return "-";
+    if (/^\D+$/.test(input)) return "9";
+    if (thousands === null || thousands === void 0) thousands = delimiter === "," ? "." : ",";
+    let addThousands = (input2, thousands2)=>{
+        let output = "";
+        let counter = 0;
+        for(let i = input2.length - 1; i >= 0; i--){
+            if (input2[i] === thousands2) continue;
+            if (counter === 3) {
+                output = input2[i] + thousands2 + output;
+                counter = 0;
+            } else output = input2[i] + output;
+            counter++;
+        }
+        return output;
+    };
+    let minus = input.startsWith("-") ? "-" : "";
+    let strippedInput = input.replaceAll(new RegExp(`[^0-9\\${delimiter}]`, "g"), "");
+    let template = Array.from({
+        length: strippedInput.split(delimiter)[0].length
+    }).fill("9").join("");
+    template = `${minus}${addThousands(template, thousands)}`;
+    if (precision > 0 && input.includes(delimiter)) template += `${delimiter}` + "9".repeat(precision);
+    queueMicrotask(()=>{
+        if (this.el.value.endsWith(delimiter)) return;
+        if (this.el.value[this.el.selectionStart - 1] === delimiter) this.el.setSelectionRange(this.el.selectionStart - 1, this.el.selectionStart - 1);
+    });
+    return template;
+}
+// packages/mask/builds/module.js
+var module_default = src_default;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"dIQaP"}]},["gk2UF","f7HqZ"], "f7HqZ", "parcelRequire4480")
 
 //# sourceMappingURL=profile-submit-pro_admin.js.map

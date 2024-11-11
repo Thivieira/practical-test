@@ -10,9 +10,9 @@ export function submissionsTabHandler() {
       notification_email: true,
       notification_email_from: '',
       notification_email_subject: 'Form submission',
-      date_format: 'mm/dd/yyyy',
+      date_format: 'MM/DD/YYYY',
     },
-    dateFormatOptions: ['dd/mm/yyyy', 'mm/dd/yyyy'],
+    dateFormatOptions: ['DD/MM/YYYY', 'MM/DD/YYYY'],
     config: window.submissionsConfig,
     translations: window.submissionsTranslations,
     errors: {

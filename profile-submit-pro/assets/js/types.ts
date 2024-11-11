@@ -12,7 +12,6 @@ export type Profile = {
   birthdate: string;
   street: string;
   street_number: string;
-  neighborhood: string | null;
   city: string;
   state: string;
   postal_code: string;

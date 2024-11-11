@@ -52,7 +52,7 @@ class Settings {
 		'daily_submission_limit'     => 50,
 		'notification_email_from'    => '',
 		'notification_email_subject' => 'Form submission',
-		'date_format'                => 'mm/dd/yyyy',
+		'date_format'                => 'MM/DD/YYYY',
 	);
 
 	const DEFAULT_PREFIX = 'profile_submit_pro_';

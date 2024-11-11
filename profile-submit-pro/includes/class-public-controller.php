@@ -98,7 +98,7 @@ class PublicController {
 		}
 
 		if ( $this->daily_submission_limit_reached() ) {
-			wp_send_json_error( array( 'message' => 'Daily submission limit reached' ) );
+			wp_send_json_error( array( 'message' => 'Daily submission limit reached' ), 400 );
 			wp_die();
 		}
 
@@ -143,7 +143,7 @@ class PublicController {
 				'address'    => __( 'Your address', 'profile-submit-pro' ),
 				'interests'  => __( 'Your interests', 'profile-submit-pro' ),
 				'cv'         => __( 'Your CV', 'profile-submit-pro' ),
-				'dateFormat' => __( 'mm/dd/yyyy', 'profile-submit-pro' ),
+				'dateFormat' => Settings::get_option( 'date_format' ),
 			),
 		);
 
@@ -194,7 +194,7 @@ class PublicController {
 				'address'    => __( 'Your address', 'profile-submit-pro' ),
 				'interests'  => __( 'Your interests', 'profile-submit-pro' ),
 				'cv'         => __( 'Your CV', 'profile-submit-pro' ),
-				'dateFormat' => __( 'mm/dd/yyyy', 'profile-submit-pro' ),
+				'dateFormat' => Settings::get_option( 'date_format' ),
 			),
 		);
 
