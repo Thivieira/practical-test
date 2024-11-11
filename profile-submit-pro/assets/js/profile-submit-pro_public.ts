@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import mask from '@alpinejs/mask'
+import mask from '@alpinejs/mask';
 import { profileFormHandler } from './profile';
 import { formHandler } from './public-form';
 

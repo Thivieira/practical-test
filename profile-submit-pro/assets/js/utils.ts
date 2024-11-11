@@ -19,7 +19,9 @@ export const formatDate = (
 };
 
 export const getCountries = async (): Promise<Country[]> => {
-  const response = await fetch('/wp-content/plugins/profile-submit-pro/assets/countries.json');
+  const response = await fetch(
+    '/wp-content/plugins/profile-submit-pro/assets/countries.json',
+  );
   const data = await response.json();
   return data;
 };
@@ -29,7 +31,6 @@ export const getIpAddressCountryCode = async (): Promise<string> => {
   const data = await response.json();
   return data.country_code;
 };
-
 
 export const loadIntlTelInput = async (
   successCallback: (country_code: string) => void,
@@ -41,7 +42,6 @@ export const loadIntlTelInput = async (
       initialCountry: 'auto',
       containerClass: 'iti w-full',
       geoIpLookup: async (callback) => {
-
         try {
           const country_code = await getIpAddressCountryCode();
           callback(country_code);
@@ -54,4 +54,4 @@ export const loadIntlTelInput = async (
       loadUtilsOnInit: () => import('intl-tel-input/build/js/utils.js'),
     });
   }
-},
+};

@@ -40,19 +40,22 @@ export function submissionsTabHandler() {
         daily_submission_limit: submissionsSettingsData.daily_submission_limit,
         email_template: submissionsSettingsData.email_template,
         notification_email: submissionsSettingsData.notification_email,
-        notification_email_from: submissionsSettingsData.notification_email_from,
-        notification_email_subject: submissionsSettingsData.notification_email_subject,
+        notification_email_from:
+          submissionsSettingsData.notification_email_from,
+        notification_email_subject:
+          submissionsSettingsData.notification_email_subject,
         date_format: submissionsSettingsData.date_format,
       };
 
       this.formData = preparedFormData;
       this.originalSubmissionsSettings = JSON.parse(
-        JSON.stringify(preparedFormData)
+        JSON.stringify(preparedFormData),
       );
     },
     validateIfFormIsChanged() {
       return (
-        JSON.stringify(this.formData) !== JSON.stringify(this.originalSubmissionsSettings)
+        JSON.stringify(this.formData) !==
+        JSON.stringify(this.originalSubmissionsSettings)
       );
     },
     async saveSubmissionsSettings() {

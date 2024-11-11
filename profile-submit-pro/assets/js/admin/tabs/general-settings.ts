@@ -38,7 +38,7 @@ export function generalSettingsTabHandler() {
       this.formData = preparedFormData;
 
       this.originalGeneralSettings = JSON.parse(
-        JSON.stringify(preparedFormData)
+        JSON.stringify(preparedFormData),
       );
     },
     async saveGeneralSettings() {

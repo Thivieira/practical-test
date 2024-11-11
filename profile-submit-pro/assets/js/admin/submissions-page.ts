@@ -24,7 +24,7 @@ export function submissionsPageHandler() {
           }).then(async (userResult) => {
             let deleteUser = false;
             if (userResult.isConfirmed) {
-              deleteUser = true
+              deleteUser = true;
             }
             try {
               await this.deleteSubmission(submissionId, deleteUser);
@@ -40,12 +40,17 @@ export function submissionsPageHandler() {
       try {
         await fetch(this.config.ajax_url, {
           method: 'POST',
-          body: new URLSearchParams({ action: this.config.action, id: submissionId.toString(), deleteUser: deleteUser.toString(), security: this.config.security }),
+          body: new URLSearchParams({
+            action: this.config.action,
+            id: submissionId.toString(),
+            deleteUser: deleteUser.toString(),
+            security: this.config.security,
+          }),
         });
         return;
       } catch (e) {
         return;
       }
-    }
+    },
   };
 }
